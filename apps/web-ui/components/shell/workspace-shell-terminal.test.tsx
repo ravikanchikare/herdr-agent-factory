@@ -200,7 +200,7 @@ describe("WorkspaceShell terminal toggle", () => {
     renderShell(projectionWithDraft())
 
     const toggles = screen.getAllByRole("button", { name: "Open Terminal" })
-    expect(toggles).toHaveLength(2)
+    expect(toggles).toHaveLength(1)
     for (const toggle of toggles) {
       expect(toggle.querySelector("svg.lucide-terminal")).not.toBeNull()
       expect(toggle.querySelector("svg.lucide-panel-bottom")).toBeNull()
@@ -211,7 +211,7 @@ describe("WorkspaceShell terminal toggle", () => {
     renderShell(projectionWithDraft(), true)
 
     const toggles = screen.getAllByRole("button", { name: "Close Terminal" })
-    expect(toggles).toHaveLength(2)
+    expect(toggles).toHaveLength(1)
     for (const toggle of toggles) {
       expect(toggle.querySelector("svg.lucide-terminal")).not.toBeNull()
       expect(toggle.querySelector("svg.lucide-panel-bottom")).toBeNull()
@@ -262,7 +262,7 @@ describe("WorkspaceShell terminal toggle", () => {
     })) {
       fireEvent.click(button)
     }
-    expect(intents).toEqual(Array.from({ length: 4 }, () => ({
+    expect(intents).toEqual(Array.from({ length: 2 }, () => ({
       type: "agentDraft.toggleWorkspace",
       agentDraftId: draft.id,
     })))

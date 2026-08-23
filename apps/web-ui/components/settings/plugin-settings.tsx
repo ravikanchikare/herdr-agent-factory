@@ -198,7 +198,19 @@ export function PluginSettings({
     }
   }, [emitIntent, projection.pluginCatalogs, projection.pluginRegistries])
 
-  useSettingsErrorToast("Plugin operation failed", projection.pluginError)
+  // Suppress noisy background registry fetch failures; show inline instead.
+  // User-initiated actions (install/uninstall) still toast via pendingAction.
+  const pluginErrorForToast = React.useMemo(() => {
+    if (!projection.pluginError) return undefined
+    if (
+      projection.pluginError.toLowerCase().includes("registry download failed") &&
+      !pendingAction
+    ) {
+      return undefined
+    }
+    return projection.pluginError
+  }, [projection.pluginError, pendingAction])
+  useSettingsErrorToast("Plugin operation failed", pluginErrorForToast)
 
   const runAction = React.useCallback(
     async (
@@ -360,6 +372,16 @@ export function PluginSettings({
             Discover signed plugins that add connectors and skills to your
             Environments.
           </p>
+          {projection.pluginError &&
+          catalogPlugins.length === 0 &&
+          !isCatalogLoading ? (
+            <Alert variant="destructive">
+              <AlertDescription className="text-xs">
+                Registry unavailable — {projection.pluginError}. Verify the
+                registry URL and signature in your plugin configuration.
+              </AlertDescription>
+            </Alert>
+          ) : null}
           {isCatalogLoading && catalogPlugins.length === 0 ? (
             <MarketplaceSkeleton />
           ) : visibleMarketplace.length === 0 ? (

@@ -1044,13 +1044,11 @@ function RunLifecycleActions({
   draft,
   project,
   run,
-  herdr,
   selectedEnvironment,
   readyEnvironments,
   dirty,
   emitIntent,
   startDraftRun,
-  nativeTerminalVisible,
 }: {
   draft: AgentDraftProjection
   project?: ProjectProjection
@@ -1065,30 +1063,14 @@ function RunLifecycleActions({
     draftId: string,
     environmentId: string,
   ) => Promise<void>
-  nativeTerminalVisible: boolean
+  nativeTerminalVisible?: boolean
 }) {
   const [startingRunId, setStartingRunId] = React.useState<string>()
   const starting = Boolean(startingRunId)
-  const terminalAction = (
-    <Button
-      size="sm"
-      disabled={!nativeTerminalVisible && herdr?.freshness !== "live"}
-      variant={nativeTerminalVisible ? "secondary" : "default"}
-      aria-pressed={nativeTerminalVisible}
-      onClick={() => void emitIntent({
-        type: "agentDraft.toggleWorkspace",
-        agentDraftId: draft.id,
-      })}
-    >
-      <TerminalIcon data-icon="inline-start" />
-      {nativeTerminalVisible ? "Close Terminal" : "Open Terminal"}
-    </Button>
-  )
 
   if (!run) {
     return (
       <div className="flex items-center gap-2">
-        {terminalAction}
         {readyEnvironments.length > 1 ? (
           <Select
             value={selectedEnvironment ?? ""}
@@ -1159,11 +1141,10 @@ function RunLifecycleActions({
   }
 
   if (runIsTerminal(run)) {
-    return terminalAction
+    return null
   }
   return (
     <div className="flex items-center gap-2">
-      {terminalAction}
       <RunIntentButton label="Cancel Run" run={run} emitIntent={emitIntent} />
     </div>
   )

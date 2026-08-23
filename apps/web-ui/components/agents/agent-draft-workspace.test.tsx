@@ -379,7 +379,7 @@ describe("AgentDraftWorkspace", () => {
       sessions: [orchestrator],
       selectedRunId: run.id,
     })
-    expect(screen.getByRole("button", { name: "Open Terminal" })).toBeDisabled()
+    expect(screen.queryByRole("button", { name: "Open Terminal" })).toBeNull()
     expect(screen.queryByRole("region", { name: "Orchestrator terminal" }))
       .toBeNull()
   })
@@ -419,17 +419,12 @@ describe("AgentDraftWorkspace", () => {
   })
 
   it("shows the native terminal action before a Run exists", () => {
-    const emitIntent = vi.fn(async () => undefined)
     renderWorkspace({
       herdr: { connected: true, freshness: "live", issues: [] },
-      emitIntent,
     })
 
-    fireEvent.click(screen.getByRole("button", { name: "Open Terminal" }))
-    expect(emitIntent).toHaveBeenCalledWith({
-      type: "agentDraft.toggleWorkspace",
-      agentDraftId: draft.id,
-    })
+    expect(screen.queryByRole("button", { name: "Open Terminal" })).toBeNull()
+    expect(screen.getByRole("button", { name: "Start Run" })).toBeVisible()
   })
 
   it("shows a running spinner while Start Run is being accepted", async () => {
@@ -459,37 +454,27 @@ describe("AgentDraftWorkspace", () => {
 
   it("opens the Draft's Herdr workspace while a Run is active", () => {
     const run = makeRun("orchestrating")
-    const emitIntent = vi.fn(async () => undefined)
     renderWorkspace({
       runs: [run],
       selectedRunId: run.id,
       herdr: { connected: true, freshness: "live", issues: [] },
-      emitIntent,
     })
 
-    fireEvent.click(screen.getByRole("button", { name: "Open Terminal" }))
-    expect(emitIntent).toHaveBeenCalledWith({
-      type: "agentDraft.toggleWorkspace",
-      agentDraftId: draft.id,
-    })
+    expect(screen.queryByRole("button", { name: "Open Terminal" })).toBeNull()
+    expect(screen.getByRole("button", { name: "Cancel Run" })).toBeVisible()
   })
 
-  it("routes the close action through the same Run workspace intent", () => {
+  it("does not show a Close Terminal action when the terminal is already visible", () => {
     const run = makeRun("orchestrating")
-    const emitIntent = vi.fn(async () => undefined)
     renderWorkspace({
       runs: [run],
       selectedRunId: run.id,
       herdr: { connected: true, freshness: "live", issues: [] },
-      emitIntent,
       nativeTerminalVisible: true,
     })
 
-    fireEvent.click(screen.getByRole("button", { name: "Close Terminal" }))
-    expect(emitIntent).toHaveBeenCalledWith({
-      type: "agentDraft.toggleWorkspace",
-      agentDraftId: draft.id,
-    })
+    expect(screen.queryByRole("button", { name: "Close Terminal" })).toBeNull()
+    expect(screen.queryByRole("button", { name: "Open Terminal" })).toBeNull()
   })
 
   it("exposes relative worktree display with full path on copy", async () => {
@@ -634,7 +619,7 @@ describe("AgentDraftWorkspace", () => {
       renderWorkspace({ runs: [run], selectedRunId: run.id })
 
       expect(screen.getByRole("button", { name: "Start Run" })).toBeVisible()
-      expect(screen.getByRole("button", { name: "Open Terminal" })).toBeVisible()
+      expect(screen.queryByRole("button", { name: "Open Terminal" })).toBeNull()
       expect(screen.queryByRole("button", { name: "Iterate" })).toBeNull()
       expect(screen.queryByRole("button", { name: "Cancel Run" })).toBeNull()
     },

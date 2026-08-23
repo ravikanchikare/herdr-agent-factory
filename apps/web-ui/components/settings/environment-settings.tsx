@@ -133,7 +133,6 @@ export function EnvironmentSettings({
   }
   const guard = useUnsavedChangesGuard(isDirty)
   useSettingsErrorToast("Environment operation failed", projection.environmentError)
-  useSettingsErrorToast("Plugin operation failed", projection.pluginError)
 
   const loadDraft = React.useCallback((environment: EnvironmentDto | undefined) => {
     const configuration = environment ? draftOf(environment) : emptyDraft
