@@ -320,9 +320,10 @@ interactive controls.
   `services/runtime/src/herdr_sessions.rs` is the only runtime module that uses
   the Herdr client.
 - `crates/herdr-client`: the only crate that speaks the Herdr socket protocol.
-- `crates/app-core`, `crates/factory-runtime`, and `crates/project-store`:
+- `crates/app-core`, `crates/project-store`, and `crates/git-runtime`:
   product transitions, Run evidence, projections, and the minimal durable
-  SQLite ledger. They do not mirror Herdr's runtime state machine.
+  SQLite ledger (`services/runtime` is the composition root). They do not mirror
+  Herdr's runtime state machine.
 - `crates/environment-runtime`, `crates/llm-provider-runtime`,
   `crates/llm-gateway`, and `crates/platform-secrets`: Environment, provider,
   gateway, and credential boundaries.
@@ -339,11 +340,11 @@ interactive controls.
 - `packages/shared/theme`: semantic design tokens.
 - `packages/shared/runtime-client`: generated frontend bindings.
 - `plugins/`: fixtures and plugin packages. `scripts/` and `tooling/`:
-  repository orchestration. `docs/architecture/`: ownership notes and accepted
+  repository orchestration. `docs/spec/`: ownership notes and accepted
   ADRs.
 
-Start architecture work with `docs/architecture/ownership.md`,
-`docs/architecture/herdr.md`, and the accepted ADRs. When prose and executable
+Start architecture work with `docs/spec/ownership.md`,
+`docs/spec/herdr.md`, and the accepted ADRs. When prose and executable
 contracts disagree, stop and reconcile the owning contract or ADR instead of
 silently creating a third interpretation. The Herdr-native authority model in
 this file is the current product direction. Revise older ADRs that assign direct
@@ -400,7 +401,7 @@ capability. Do not add a web terminal renderer or introduce `xterm.js`.
 
 ## Build, Test, and Development
 
-Use Node 24+, pnpm 10+, and the pinned Native SDK through `pnpm exec native`.
+Use Node 24+, pnpm 11+, and the pinned Native SDK through `pnpm exec native`.
 
 - `pnpm dev:web` serves only the browser UI at
   `http://127.0.0.1:3000/`. It does not validate Native-SDK, Rust, Herdr, or

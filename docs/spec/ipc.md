@@ -11,11 +11,15 @@ Each frame is:
 1. Four-byte unsigned big-endian JSON payload length.
 2. UTF-8 JSON payload of exactly that length.
 
-The maximum payload is 1 MiB. Zero-length, oversized, truncated, non-UTF-8, and
-invalid JSON frames are rejected. Runtime stdout is reserved for frames; logs
-go to stderr.
+`crates/ipc-contract` defines `MAX_FRAME_BYTES = 1 MiB` and `PROTOCOL_VERSION: u16 = 1`
+(distinct from `crates/runtime-contract` `CONTRACT_VERSION: u32 = 1`). Frame
+variants are `Request` / `Response` / `Event` / `Ready` / `Hello` / `Shutdown`.
+Zero-length, oversized, truncated, non-UTF-8, and invalid JSON frames are
+rejected. Runtime stdout is reserved for frames; logs go to stderr.
 
 ## Envelopes
+
+Envelope `id` is a `Uuid` (not an opaque string). `version` is `PROTOCOL_VERSION`.
 
 Request:
 
@@ -23,7 +27,7 @@ Request:
 {
   "kind": "request",
   "version": 1,
-  "id": "opaque-request-id",
+  "id": "123e4567-e89b-12d3-a456-426614174000",
   "method": "snapshot.get",
   "params": {}
 }
@@ -35,7 +39,7 @@ Successful response:
 {
   "kind": "response",
   "version": 1,
-  "id": "opaque-request-id",
+  "id": "123e4567-e89b-12d3-a456-426614174000",
   "result": {}
 }
 ```
@@ -46,7 +50,7 @@ Error response:
 {
   "kind": "response",
   "version": 1,
-  "id": "opaque-request-id",
+  "id": "123e4567-e89b-12d3-a456-426614174000",
   "error": {
     "code": "invalid_params",
     "message": "Human-readable explanation"
@@ -100,7 +104,8 @@ reload, sequence gap, Rust restart, or invalid event triggers `snapshot.get`.
 - `project.create`
 
 `crates/runtime-contract` is the authority on the full method list; it generates
-both the JSON Schema and the TypeScript bindings, so neither is hand-written.
+both the JSON Schema and the TypeScript bindings into
+`packages/shared/runtime-client`, so neither is hand-written.
 
 Unknown methods return `method_not_found`. Invalid parameters return
 `invalid_params`. A failed state precondition returns `conflict`. Internal

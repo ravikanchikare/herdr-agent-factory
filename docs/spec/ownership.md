@@ -1,5 +1,7 @@
 # Architecture ownership
 
+> Canonical authority: AGENTS.md — this file elaborates the six-authority model.
+
 Agent Factory joins six authorities without copying one authority's live state
 into another writable state machine.
 
@@ -73,9 +75,12 @@ the local ledger.
 ## LLM Provider ownership
 
 Rust owns an application-level catalog of reusable LLM Providers. SQLite stores
-each provider's UUID, name, type, endpoint, opaque credential reference,
-allowlist, default model, and current readiness. Raw credential values remain in
-Keychain and are resolved immediately before discovery or gateway startup.
+each provider as `provider_json TEXT` in the providers table (not separate
+columns for provider fields) holding UUID, name, type, endpoint, opaque
+credential reference, allowlist, default model, and current readiness; the
+environments table stores `resolved_llm_json` for the resolved LLM input.
+Raw credential values remain in Keychain and are resolved immediately before
+discovery or gateway startup.
 
 Provider type, endpoint, credential reference, allowlist, and default model are
 execution-affecting fields. Saving any of them marks every linked Environment as
@@ -104,3 +109,11 @@ only the loopback Anthropic endpoint, a non-secret sentinel, and the selected
 model into the child process. It replaces upstream credentials and enforces the
 Environment-bounded model policy. Inherited Anthropic, Bedrock, and Vertex
 configuration is neutralized.
+
+---
+
+> Notes — Herdr test isolation uses `AGENT_FACTORY_HERDR_SOCKET` for a stand-in
+> server and `AGENT_FACTORY_HERDR_SESSION` to select a named Herdr session
+> alongside the default socket path. Protocol versions are distinct:
+> `ipc-contract` `PROTOCOL_VERSION: u16 = 1` vs `runtime-contract`
+> `CONTRACT_VERSION: u32 = 1`.

@@ -1,3 +1,5 @@
+> ⚠️ Research draft — speculative. NOT the current Herdr-native architecture. Current direction is AGENTS.md and docs/spec/ownership.md. See ADR 0012 for parking decision.
+
 # OpenCode port mapping: Agent Factory on a pure TypeScript runtime
 
 Status: research draft
@@ -207,7 +209,7 @@ list is historical, not live.
     Ghostty compiled to WebAssembly (`ghostty-web`), not xterm.js — use the
     same emulator for consistency (§9).
 
-## 9. OpenCode's web terminal stack (from `/Users/ravi/code/opencode` source)
+## 9. OpenCode's web terminal stack (from OpenCode source)
 
 OpenCode does not embed a terminal TUI in its web app. Instead the server
 owns PTY processes and exposes a WebSocket attach surface; the web client

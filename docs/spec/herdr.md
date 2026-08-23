@@ -4,7 +4,7 @@ Herdr is Agent Factory's permanent agent runtime. Agent Factory connects as a
 client over Herdr's control socket (`~/.config/herdr/herdr.sock`, or a named
 session under `sessions/<name>/`). `AGENT_FACTORY_HERDR_SESSION` selects a named
 Herdr session. `AGENT_FACTORY_HERDR_SOCKET` points tests at an isolated stand-in
-server.
+server. Socket discovery honors `herdr-client.toml` (see `crates/herdr-client`).
 
 Agent Factory does not start, stop, restart, update, or kill Herdr. When it is
 unavailable, the durable product view remains usable, the last runtime
@@ -78,8 +78,11 @@ Herdr lifecycle and placement are never written to SQLite.
 
 Herdr performs Draft worktree creation, opening, and removal through its
 worktree API. Before requesting an operation, Rust validates Agent Factory's
-repository policy and stable intent identity. Afterward, Rust observes Git to
-verify the actual checkout, branch, HEAD, cleanliness, diff, commits, and tags.
+repository policy and stable intent identity — specifically
+`.agent-factory/config.json` `worktreesDirectory` via
+`services/runtime/src/repository_config.rs` before calling
+`Herdr.create_worktree`. Afterward, Rust observes Git to verify the actual
+checkout, branch, HEAD, cleanliness, diff, commits, and tags.
 
 Publishing or discarding a Draft may authorize worktree cleanup. Finishing a
 Run, closing a pane, ending a managed session, or closing the Herdr Workspace

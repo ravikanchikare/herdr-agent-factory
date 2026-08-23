@@ -3,9 +3,10 @@ packages:
   - "packages/shared/*"
   - "tooling/*"
 
-onlyBuiltDependencies:
-  - "@swc/core"
-  - "esbuild"
+allowBuilds:
+  "@swc/core": true
+  esbuild: true
+  unrs-resolver: false
 
 patchedDependencies:
   "@native-sdk/cli@0.9.0": "patches/@native-sdk__cli@0.9.0.patch"

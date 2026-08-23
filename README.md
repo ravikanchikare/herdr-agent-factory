@@ -23,7 +23,7 @@ Ownership is deliberately strict:
   bundles, installs, or starts an agent, or Herdr itself.
 
 The current scope, subsystem authority map, architecture, and accepted
-decisions are in [`docs/architecture/`](docs/architecture/), with repository
+decisions are in [`docs/spec/`](docs/spec/), with repository
 ownership rules in [`AGENTS.md`](AGENTS.md).
 
 ## Requirements
