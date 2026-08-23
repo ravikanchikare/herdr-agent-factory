@@ -22,8 +22,8 @@ export function getDraftWindowSearchSnapshot(): string {
   return window.location.search
 }
 
-export function getDraftWindowSearchServerSnapshot(): undefined {
-  return undefined
+export function getDraftWindowSearchServerSnapshot(): string {
+  return ""
 }
 
 export function readDraftWindowTarget(

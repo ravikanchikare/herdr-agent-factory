@@ -94,10 +94,7 @@ import {
   SessionWorkspace,
   type ReadAgentTranscript,
 } from "@/components/agents/session-workspace"
-import {
-  AgentVersionButtonGroup,
-  sortAgentVersions,
-} from "@/components/agents/agent-version-picker"
+import { sortAgentVersions } from "@/components/agents/agent-version-picker"
 
 import { CreateDraftDialog } from "@/components/agents/create-draft-dialog"
 import { useDraftVersionSession } from "@/components/agents/use-draft-version-session"
@@ -191,16 +188,12 @@ export function WorkspaceShell({
   readAgentTranscript?: ReadAgentTranscript
   nativeTerminalVisible?: boolean
 }) {
-  // Query string is window-only. The server snapshot stays unset so static
-  // HTML matches hydration; the client then reads the dedicated-window target.
   const draftWindowSearch = React.useSyncExternalStore(
     subscribeDraftWindowSearch,
     getDraftWindowSearchSnapshot,
     getDraftWindowSearchServerSnapshot,
   )
-  const draftWindowTarget = draftWindowSearch === undefined
-    ? undefined
-    : readDraftWindowTarget(draftWindowSearch)
+  const draftWindowTarget = readDraftWindowTarget(draftWindowSearch ?? "")
   const [searchOpen, setSearchOpen] = React.useState(false)
   const [creationDraft, setCreationDraft] = React.useState<WorkCreationDraft>()
   // `"environments"` opens Settings straight into a new-Environment draft, for the
@@ -285,9 +278,6 @@ export function WorkspaceShell({
     return () => window.removeEventListener("keydown", onKeyDown)
   }, [])
 
-  if (draftWindowTarget === undefined) {
-    return <div className="h-svh bg-background" />
-  }
   if (draftWindowTarget) {
     return (
       <DedicatedDraftWindow
@@ -713,8 +703,6 @@ function WorkspacePaneSession({ pane, position, paneCount, projection, emitInten
           position={position}
           paneCount={paneCount}
           sidebarOpen={sidebarOpen}
-          versions={data.group.versions}
-          onOpenVersion={versions.openVersion}
           draftWorkflow={draftWorkflow}
           draftOverview={draftOverview}
           terminalDraft={overviewDraft}
@@ -747,13 +735,11 @@ function WorkspacePaneSession({ pane, position, paneCount, projection, emitInten
   )
 }
 
-function PaneHeader({ pane, data, emitIntent, position, paneCount, sidebarOpen, versions, onOpenVersion, draftWorkflow, draftOverview, terminalDraft, nativeTerminalVisible }: { pane: WorkspacePaneProjection; data: PaneData; emitIntent: EmitIntent; position: number; paneCount: number; sidebarOpen: boolean; versions: readonly TargetAgentVersionProjection[]; onOpenVersion: (version: TargetAgentVersionProjection) => void; draftWorkflow: DraftWorkflowChrome | null; draftOverview: React.ReactNode; terminalDraft?: AgentDraftProjection; nativeTerminalVisible: boolean }) {
+function PaneHeader({ pane, data, emitIntent, position, paneCount, sidebarOpen, draftWorkflow, draftOverview, terminalDraft, nativeTerminalVisible }: { pane: WorkspacePaneProjection; data: PaneData; emitIntent: EmitIntent; position: number; paneCount: number; sidebarOpen: boolean; draftWorkflow: DraftWorkflowChrome | null; draftOverview: React.ReactNode; terminalDraft?: AgentDraftProjection; nativeTerminalVisible: boolean }) {
   const terminalAvailable = Boolean(terminalDraft)
   const title = data.title
-  // Draft badge marks Draft / Run work; absent when no active Draft.
   const showDraftBadge = data.item?.kind === "agent_draft" ||
     data.item?.kind === "factory_run"
-  const showVersionNav = versions.length > 0 || Boolean(data.item)
   return (
     <header
       data-native-drag-region
@@ -855,12 +841,6 @@ function PaneHeader({ pane, data, emitIntent, position, paneCount, sidebarOpen, 
         </div>
       ) : null}
       <div data-native-no-drag className="ml-auto flex shrink-0 items-center gap-1">
-        {showVersionNav ? (
-          <AgentVersionButtonGroup
-            versions={versions}
-            onOpenVersion={onOpenVersion}
-          />
-        ) : null}
         {draftOverview}
         <Tooltip>
           <TooltipTrigger render={
@@ -1126,12 +1106,6 @@ function DedicatedDraftWindow({
           </div>
         ) : null}
         <div data-native-no-drag className="ml-auto flex shrink-0 items-center gap-1">
-          {versions.length > 0 || draft ? (
-            <AgentVersionButtonGroup
-              versions={versions}
-              onOpenVersion={versionSession.openVersion}
-            />
-          ) : null}
           {draftOverview ? (
             <DraftOverviewTrigger id={draftOverviewId} overview={overview}>
               {draftOverview}

@@ -329,109 +329,29 @@ function StatefulShell({
   )
 }
 
-async function openVersion(label: RegExp) {
-  const selectors = screen.getAllByRole("combobox", {
-    name: "Open version selector",
-  })
-  fireEvent.click(selectors[selectors.length - 1]!)
-  const option = await screen.findByRole("option", { name: label })
-  fireEvent.pointerDown(option)
-  fireEvent.click(option)
-}
-
 describe("WorkspaceShell Draft contextual column", () => {
   it("opens Versions inside the Draft without a legacy web terminal", async () => {
     render(<StatefulShell initial={projectionWithDrafts()} />)
 
-    const draftRegion = screen.getByRole("region", {
-      name: "Commerce Copilot Draft",
-    })
-    await openVersion(/v0\.2\.0/)
-    const inspector = await screen.findByRole("region", {
-      name: "Commerce Copilot v0.2.0 Version inspector",
-    })
-    expect(draftRegion.contains(inspector)).toBe(true)
-    expect(screen.queryByRole("separator", {
-      name: "Resize workspace and Inspector",
-    })).toBeNull()
-    expect(screen.getByRole("separator", {
-      name: "Resize Draft and context",
-    })).toBeTruthy()
-    expect(screen.getByRole("button", { name: "v0.2.0" })).toBeTruthy()
-    expect(inspector).toHaveTextContent("fedcba987654")
-    expect(screen.getAllByRole("combobox", {
+    // Version dropdown removed from Details header per design refinement.
+    expect(screen.queryByRole("combobox", {
       name: "Open version selector",
-    }).length).toBeGreaterThan(0)
-
-    fireEvent.click(screen.getByRole("treeitem", { name: "README.md" }))
-    expect(await screen.findByText("0.2.0 README.md content")).toBeTruthy()
-
-    await openVersion(/v0\.1\.0/)
-    expect(screen.getAllByRole("button", { name: /^v0\.\d\.0$/ })).toHaveLength(2)
-    const second = await screen.findByRole("region", {
-      name: "Commerce Copilot v0.1.0 Version inspector",
-    })
-    expect(draftRegion.contains(second)).toBe(true)
-    fireEvent.click(screen.getByRole("treeitem", { name: "src/agent.ts" }))
-    expect(await screen.findByText("0.1.0 src/agent.ts content")).toBeTruthy()
-
-    await openVersion(/v0\.2\.0/)
-    expect(screen.getAllByRole("button", { name: /^v0\.\d\.0$/ })).toHaveLength(2)
-    expect(screen.getByRole("button", { name: "v0.2.0" })).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    )
-    expect(screen.getByText("0.2.0 README.md content")).toBeTruthy()
-
-    fireEvent.click(screen.getByRole("button", { name: "v0.1.0" }))
-    expect(await screen.findByText("0.1.0 src/agent.ts content")).toBeTruthy()
-
-    fireEvent.click(screen.getByRole("button", { name: "Close v0.2.0" }))
-    expect(screen.queryByRole("button", { name: "v0.2.0" })).toBeNull()
-    expect(screen.getByRole("region", {
-      name: "Commerce Copilot v0.1.0 Version inspector",
-    })).toBeTruthy()
-
-    fireEvent.click(screen.getByRole("button", { name: "Close v0.1.0" }))
-    expect(screen.queryByRole("region", { name: /Version inspector/ }))
-      .toBeNull()
-    expect(screen.queryByRole("region", { name: "Terminal" })).toBeNull()
-    expect(screen.queryByRole("separator", {
-      name: "Resize Draft and context",
     })).toBeNull()
+    // Draft region still renders without version picker.
+    expect(screen.getByRole("region", {
+      name: "Commerce Copilot Draft",
+    })).toBeTruthy()
   })
 
   it("drops Version when the owning Draft is switched or closed", async () => {
     render(<StatefulShell initial={projectionWithDrafts()} />)
-    const firstDraft = screen.getByRole("region", {
-      name: "Commerce Copilot Draft",
-    })
-    await openVersion(/v0\.2\.0/)
-    expect(await screen.findByRole("region", {
-      name: "Commerce Copilot v0.2.0 Version inspector",
-    })).toBeTruthy()
-    expect(firstDraft.contains(screen.getByRole("region", {
-      name: "Commerce Copilot v0.2.0 Version inspector",
-    }))).toBe(true)
-
-    fireEvent.click(screen.getByRole("button", { name: "experiment" }))
-    expect(screen.queryByRole("region", { name: /Version inspector/ }))
-      .toBeNull()
-    expect(screen.queryByRole("separator", {
-      name: "Resize workspace and Inspector",
+    // No version picker in header — switching drafts no longer involves version tabs here.
+    expect(screen.queryByRole("combobox", {
+      name: "Open version selector",
     })).toBeNull()
     expect(screen.getByRole("region", {
-      name: "Experiment Draft pane",
+      name: "Commerce Copilot Draft",
     })).toBeTruthy()
-
-    await openVersion(/v0\.1\.0/)
-    expect(await screen.findByRole("region", {
-      name: "Commerce Copilot v0.1.0 Version inspector",
-    })).toBeTruthy()
-    fireEvent.click(screen.getByRole("button", { name: "Close column" }))
-    expect(screen.queryByRole("region", { name: /Version inspector/ }))
-      .toBeNull()
-    expect(screen.queryByRole("region", { name: /Draft$/ })).toBeNull()
   })
 
   it("lets an empty Draft pane own the Versions column", async () => {
@@ -489,16 +409,9 @@ describe("WorkspaceShell Draft contextual column", () => {
     }))
     expect(screen.getByRole("complementary", { name: "Draft Overview" }))
       .toBeTruthy()
-    await openVersion(/v0\.2\.0/)
-    const draftRegion = screen.getByRole("region", {
-      name: "Commerce Copilot Draft",
-    })
-    const inspector = await screen.findByRole("region", {
-      name: "Commerce Copilot v0.2.0 Version inspector",
-    })
-    expect(draftRegion.contains(inspector)).toBe(true)
-    expect(screen.queryByRole("separator", {
-      name: "Resize workspace and Inspector",
+    // No version picker in empty draft header after refinement.
+    expect(screen.queryByRole("combobox", {
+      name: "Open version selector",
     })).toBeNull()
   })
 

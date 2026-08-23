@@ -630,7 +630,7 @@ function DraftEditor({
 
   const main = (
     <ScrollArea className="size-full min-w-0 flex-1">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 p-6">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-6 @5xl:p-8">
         {runtimeError ? (
           <Alert variant="destructive">
             <TriangleAlertIcon />
@@ -638,29 +638,28 @@ function DraftEditor({
             <AlertDescription>{runtimeError}</AlertDescription>
           </Alert>
         ) : null}
-        <div className="flex min-w-0 flex-col gap-8">
-          <RunWorkspace
-            draft={draft}
-            project={project}
-            run={selectedRun}
-            runs={runs}
-            sessions={sessions}
-            liveAgents={liveAgents}
-            herdr={herdr}
-            selectedEnvironment={selectedEnvironment}
-            readyEnvironments={readyEnvironments}
-            dirty={false}
-            emitIntent={emitIntent}
-            startDraftRun={startDraftRun}
-            nativeTerminalVisible={nativeTerminalVisible}
-          />
-          <SessionHistory
-            draft={draft}
-            runs={runs}
-            sessions={sessions}
-            readTranscript={readAgentTranscript}
-          />
-        </div>
+        <RunWorkspace
+          draft={draft}
+          project={project}
+          run={selectedRun}
+          runs={runs}
+          sessions={sessions}
+          liveAgents={liveAgents}
+          herdr={herdr}
+          selectedEnvironment={selectedEnvironment}
+          readyEnvironments={readyEnvironments}
+          dirty={false}
+          emitIntent={emitIntent}
+          startDraftRun={startDraftRun}
+          nativeTerminalVisible={nativeTerminalVisible}
+        />
+        <Separator />
+        <SessionHistory
+          draft={draft}
+          runs={runs}
+          sessions={sessions}
+          readTranscript={readAgentTranscript}
+        />
       </div>
     </ScrollArea>
   )
@@ -707,7 +706,7 @@ function DraftDetailsPanel({
   const relativeWorktree = relativeSiblingWorktreePath(draft.worktreePath)
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-4">
       <div className="flex min-w-0 items-center gap-2 px-1">
         <h2 className="min-w-0 truncate text-sm font-semibold tracking-tight">
           {draft.name}
@@ -719,51 +718,64 @@ function DraftDetailsPanel({
         ) : null}
       </div>
       <Separator />
-
-      <div className="flex flex-col gap-0.5">
-        <div className="flex min-w-0 items-center gap-2 rounded-md px-2 py-1.5">
-          <Globe2Icon
-            aria-hidden="true"
-            className="size-4 shrink-0 text-muted-foreground"
-          />
-          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <p className="truncate text-sm font-medium">{environmentName}</p>
-            {selectedRun ? (
-              <p className="text-xs text-muted-foreground">
-                Frozen for this Run
-              </p>
-            ) : null}
+      <div className="flex flex-col gap-4">
+        <section className="flex flex-col gap-2">
+          <h3 className="px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Environment
+          </h3>
+          <div className="flex min-w-0 items-center gap-2 rounded-md border bg-card px-3 py-2.5">
+            <Globe2Icon
+              aria-hidden="true"
+              className="size-4 shrink-0 text-muted-foreground"
+            />
+            <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+              <p className="truncate text-sm font-medium">{environmentName}</p>
+              {selectedRun ? (
+                <p className="text-xs text-muted-foreground">
+                  Frozen for this Run
+                </p>
+              ) : null}
+            </div>
           </div>
-        </div>
+        </section>
         <CodeChangeTotals
           run={selectedRun}
           onOpenCodeChanges={onOpenCodeChanges}
           compact
         />
-        <DraftDisclosure title="Objective">
-          <p className="whitespace-pre-wrap text-sm leading-relaxed">
-            {draft.objective}
-          </p>
-        </DraftDisclosure>
-        <DraftDisclosure title="Success criteria">
-          <ul className="flex list-disc flex-col gap-1.5 pl-5 text-sm leading-relaxed">
-            {draft.acceptanceCriteria.map((criterion, index) => (
-              <li key={`${index}-${criterion}`}>{criterion}</li>
-            ))}
-          </ul>
-        </DraftDisclosure>
-        <CopyableIconValue
-          icon={<GitBranchIcon />}
-          label="Git branch"
-          display={draft.branchRef}
-          copyValue={draft.branchRef}
-        />
-        <CopyableIconValue
-          icon={<FolderGit2Icon />}
-          label="Worktree path"
-          display={relativeWorktree}
-          copyValue={draft.worktreePath}
-        />
+        <div className="flex flex-col gap-2">
+          <DraftDisclosure title="Objective">
+            <p className="whitespace-pre-wrap text-sm leading-relaxed">
+              {draft.objective}
+            </p>
+          </DraftDisclosure>
+          <DraftDisclosure title="Success criteria">
+            <ul className="flex list-disc flex-col gap-1.5 pl-5 text-sm leading-relaxed">
+              {draft.acceptanceCriteria.map((criterion, index) => (
+                <li key={`${index}-${criterion}`}>{criterion}</li>
+              ))}
+            </ul>
+          </DraftDisclosure>
+        </div>
+        <section className="flex flex-col gap-2">
+          <h3 className="px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Git
+          </h3>
+          <div className="flex flex-col rounded-md border divide-y">
+            <CopyableIconValue
+              icon={<GitBranchIcon />}
+              label="Git branch"
+              display={draft.branchRef}
+              copyValue={draft.branchRef}
+            />
+            <CopyableIconValue
+              icon={<FolderGit2Icon />}
+              label="Worktree path"
+              display={relativeWorktree}
+              copyValue={draft.worktreePath}
+            />
+          </div>
+        </section>
       </div>
     </div>
   )
@@ -1684,8 +1696,8 @@ function SessionHistory({
   const groups = draftSessionHistory(draft, runs, sessions)
   return (
     <section aria-labelledby="session-history-title" className="flex flex-col gap-4">
-      <div>
-        <h2 id="session-history-title" className="text-sm font-medium">
+      <div className="space-y-1">
+        <h2 id="session-history-title" className="text-sm font-semibold tracking-tight">
           Session History
         </h2>
         <p className="text-xs text-muted-foreground">
@@ -1706,37 +1718,35 @@ function SessionHistory({
           </EmptyHeader>
         </Empty>
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col divide-y divide-border rounded-lg border">
           {groups.map((group) => (
             <section
               key={group.id}
               aria-label={group.run
                 ? `${runIsTerminal(group.run) ? "Run" : "Current Run"} session history: ${group.run.objective}`
                 : "Direct managed session history"}
-              className="flex flex-col gap-3 rounded-md border p-3"
+              className="flex flex-col gap-3 p-4"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <h3 className="text-xs font-medium">
-                    {group.run
-                      ? runIsTerminal(group.run) ? "Run" : "Current Run"
-                      : "Direct managed sessions"}
-                  </h3>
-                  {group.run ? (
-                    <p className="truncate text-xs text-muted-foreground">
-                      {group.run.objective}
-                    </p>
-                  ) : null}
-                </div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {group.run
+                    ? runIsTerminal(group.run) ? "Run" : "Current Run"
+                    : "Direct managed sessions"}
+                </h3>
                 {group.run ? (
-                  <Badge variant="outline">
+                  <Badge variant="outline" className="shrink-0">
                     {runStateLabel(group.run.state)}
                   </Badge>
                 ) : null}
+                {group.run ? (
+                  <span className="min-w-0 truncate text-xs text-muted-foreground">
+                    · {group.run.objective}
+                  </span>
+                ) : null}
               </div>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col divide-y divide-border/50">
                 {group.entries.map((entry) => (
-                  <div key={entry.id} className={cn(entry.depth > 0 && "ml-6")}>
+                  <div key={entry.id} className={cn(entry.depth > 0 && "ml-4 border-l pl-4")}>
                     <SessionHistoryRow
                       entry={entry}
                       readTranscript={readTranscript}
@@ -1760,28 +1770,26 @@ function SessionHistoryRow({
   readTranscript?: ReadAgentTranscript
 }) {
   return (
-    <Collapsible className="rounded-md border">
-      <div className="flex items-center gap-2 px-2 py-1.5">
-        <CollapsibleTrigger
-          render={(
-            <button
-              type="button"
-              aria-label={`${entry.label} session, ${entry.status}`}
-              className="flex min-w-0 flex-1 items-center gap-2 rounded-md px-1 py-1 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            />
-          )}
-        >
-          <span className="text-muted-foreground transition-transform in-data-panel-open:rotate-90 [&_svg]:size-4">
-            <ChevronRightIcon aria-hidden="true" />
-          </span>
-          <Badge variant="outline">{historyKindLabel(entry.kind)}</Badge>
-          <span className="min-w-0 flex-1 truncate text-sm">{entry.label}</span>
-          <span className="shrink-0 text-xs text-muted-foreground">
-            {entry.status}
-          </span>
-        </CollapsibleTrigger>
-      </div>
-      <CollapsibleContent className="flex flex-col gap-3 border-t px-3 py-3">
+    <Collapsible className="group py-0.5">
+      <CollapsibleTrigger
+        render={(
+          <button
+            type="button"
+            aria-label={`${entry.label} session, ${entry.status}`}
+            className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left outline-none hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring"
+          />
+        )}
+      >
+        <span className="text-muted-foreground transition-transform group-data-[panel-open]:rotate-90 in-data-panel-open:rotate-90 [&_svg]:size-4">
+          <ChevronRightIcon aria-hidden="true" />
+        </span>
+        <Badge variant="outline" className="shrink-0">{historyKindLabel(entry.kind)}</Badge>
+        <span className="min-w-0 flex-1 truncate text-sm font-medium">{entry.label}</span>
+        <span className="shrink-0 text-xs text-muted-foreground">
+          {entry.status}
+        </span>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="flex flex-col gap-3 px-2 pb-3 pt-1">
         <div className="flex flex-col gap-1">
           <p className="text-xs font-medium">Initial input</p>
           <pre className="whitespace-pre-wrap rounded-md bg-muted/30 p-3 font-mono text-xs">

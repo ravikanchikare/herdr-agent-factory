@@ -748,109 +748,13 @@ test("Draft context menu opens the Draft in a new application window", async ({ 
 test("title-bar Version selector opens a horizontally stacked read-only inspector", async ({ page }) => {
   await installRuntime(page, "ready")
   await page.goto("/")
-  const sidebar = page.getByRole("navigation", { name: "Agents" })
-  const draftEntry = sidebar.locator('[data-sidebar-entry="draft"]')
-    .first()
-    .getByRole("button")
   const pane = page.getByRole("region", { name: "Commerce Copilot pane" })
   const titleBar = pane.locator("header").first()
-  const draft = page.getByRole("region", { name: "Commerce Copilot Draft" })
-  await page.evaluate(() => {
-    Object.defineProperty(navigator, "clipboard", {
-      configurable: true,
-      value: {
-        writeText: (value: string) => {
-          window.localStorage.setItem("test-clipboard", value)
-          return Promise.resolve()
-        },
-      },
-    })
-  })
-
-  await expect(draftEntry).toHaveAttribute("data-active")
-  // Draft badge after the agent name; Version is navigation-only on the right.
-  await expect(titleBar.getByText("Draft", { exact: true })).toBeVisible()
-  const versionTrigger = titleBar.getByRole("combobox", {
+  // Version dropdown removed from Details header per design refinement.
+  await expect(titleBar.getByRole("combobox", {
     name: "Open version selector",
-  })
-  await expect(versionTrigger).toHaveText("Version")
-  await expect(versionTrigger).not.toContainText("v0.")
-  await versionTrigger.click()
-  const versionPicker = page.getByRole("dialog", { name: "Select version" })
-  await expect(versionPicker).toBeVisible()
-  await expect(versionPicker.getByRole("combobox", { name: "Search versions" }))
-    .toBeVisible()
-  await versionPicker.getByRole("option", { name: /v0\.2\.0/ }).click()
-
-  await expect.poll(() => requestFor(page, "version.files.list")).toEqual({
-    versionId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
-  })
-  const inspector = page.getByRole("region", {
-    name: "Commerce Copilot v0.2.0 Version inspector",
-  })
-  const header = inspector.locator("header")
-  await expect(header.getByRole("heading", {
-    name: "Commerce Copilot v0.2.0",
-  })).toBeVisible()
-  await expect(header.locator("code")).toHaveText("fedcba987654")
-  await expect(header).not.toContainText("Files")
-  // Selecting a Version opens the Inspector without leaving the Draft view.
-  await expect(draftEntry).toHaveAttribute("data-active")
-  await expect(draft.getByRole("button", { name: "Start Run" })).toBeVisible()
+  })).toHaveCount(0)
   await expect(titleBar.getByText("Draft", { exact: true })).toBeVisible()
-  const [headingBox, badgeBox] = await Promise.all([
-    header.getByRole("heading").boundingBox(),
-    header.getByText("Read-only", { exact: true }).boundingBox(),
-  ])
-  expect(headingBox).not.toBeNull()
-  expect(badgeBox).not.toBeNull()
-  expect(badgeBox?.x).toBeGreaterThan(
-    (headingBox?.x ?? 0) + (headingBox?.width ?? 0),
-  )
-  await expect(inspector.locator('[data-slot="separator"]').first())
-    .toBeVisible()
-  await header.getByRole("button", { name: "Copy full Git commit" }).click()
-  await expect.poll(() => page.evaluate(() =>
-    window.localStorage.getItem("test-clipboard")))
-    .toBe("fedcba9876543210")
-  await expect(page.getByRole("separator", {
-    name: "Resize workspace and Inspector",
-  })).toHaveCount(0)
-  await expect(page.getByRole("separator", {
-    name: "Resize Draft and context",
-  })).toBeVisible()
-  await expect(page.getByRole("dialog", {
-    name: "Commerce Copilot v0.2.0 Version inspector",
-  })).toHaveCount(0)
-  const [draftBox, inspectorBox] = await Promise.all([
-    draft.boundingBox(),
-    inspector.boundingBox(),
-  ])
-  expect(draftBox).not.toBeNull()
-  expect(inspectorBox).not.toBeNull()
-  expect(inspectorBox?.x).toBeGreaterThanOrEqual((draftBox?.x ?? 0) - 1)
-  expect((inspectorBox?.x ?? 0) + (inspectorBox?.width ?? 0))
-    .toBeLessThanOrEqual((draftBox?.x ?? 0) + (draftBox?.width ?? 0) + 1)
-  await inspector.getByRole("treeitem", { name: "README.md" }).click()
-  await expect.poll(() => requestFor(page, "version.file.read")).toEqual({
-    versionId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
-    path: "README.md",
-  })
-  await expect(inspector.getByText("Immutable Version content")).toBeVisible()
-  await expect(inspector.locator('[contenteditable="true"]')).toHaveCount(0)
-  await header.getByRole("button", { name: "Create Draft" }).click()
-  const createDraft = page.getByRole("dialog", {
-    name: "Create Draft from v0.2.0",
-  })
-  await expect(createDraft).toBeVisible()
-  await createDraft.getByRole("button", { name: "Close" }).first().click()
-  await expectNoAxeViolations(
-    page,
-    '[aria-label="Commerce Copilot v0.2.0 Version inspector"]',
-  )
-  await expect(draftEntry).toHaveAttribute("data-active")
-  await expect(draft).toBeVisible()
-  await expect(draft.getByRole("button", { name: "Start Run" })).toBeVisible()
 })
 
 test("title-bar Terminal action toggles the single native Herdr terminal", async ({ page }) => {
@@ -972,11 +876,10 @@ test("Draft Overview switches between inline and popover modes", async ({ page }
   })
 
   await expect(titleBar.getByText("Draft", { exact: true })).toBeVisible()
-  const versionTrigger = titleBar.getByRole("combobox", {
+  // Version dropdown removed from Details header per design refinement.
+  await expect(titleBar.getByRole("combobox", {
     name: "Open version selector",
-  })
-  await expect(versionTrigger).toHaveText("Version")
-  await expect(versionTrigger).not.toContainText("v0.")
+  })).toHaveCount(0)
   await expect(titleBar.getByRole("button", {
     name: "Actions for Commerce Copilot",
   })).toBeVisible()
@@ -1138,23 +1041,10 @@ test("an Agent with no active Draft offers Versions in the title bar", async ({ 
   await expect(overview.getByText("No versions yet")).toHaveCount(0)
   await expect(page.getByRole("heading", { name: "Version history" }))
     .toHaveCount(0)
-  const sidebar = page.getByRole("navigation", { name: "Agents" })
-  await expect(sidebar.locator('[data-sidebar-entry="version"]')).toHaveCount(0)
   const pane = page.getByRole("region", { name: /pane$/ })
   const titleBar = pane.locator("header").first()
-  await titleBar.getByRole("combobox", { name: "Open version selector" }).click()
-  const versionPicker = page.getByRole("dialog", { name: "Select version" })
-  await expect(versionPicker.getByRole("option", { name: /v0\.1\.0/ }))
-    .toBeVisible()
-  await versionPicker.getByRole("option", { name: /v0\.1\.0/ }).click()
-  const draft = page.getByRole("region", { name: /Draft$/ })
-  const inspector = draft.getByRole("region", {
-    name: /v0\.1\.0 Version inspector/,
-  })
-  await expect(inspector).toBeVisible()
-  await expect(page.getByRole("separator", {
-    name: "Resize workspace and Inspector",
-  })).toHaveCount(0)
+  // Version dropdown removed from title-bar per design refinement.
+  await expect(titleBar.getByRole("combobox", { name: "Open version selector" })).toHaveCount(0)
   await expectNoAxeViolations(page)
 })
 
