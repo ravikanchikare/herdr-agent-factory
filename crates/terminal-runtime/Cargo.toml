@@ -1,0 +1,17 @@
+[package]
+name = "terminal-runtime"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+base64.workspace = true
+libc.workspace = true
+portable-pty.workspace = true
+serde.workspace = true
+schemars.workspace = true
+thiserror.workspace = true
+uuid.workspace = true
+

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentfactory.app/schemas/update-manifest-v1.json",
+  "title": "Agent Factory Update Manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "keyId", "releases"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "keyId": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "releases": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100,
+      "items": { "$ref": "#/$defs/release" }
+    }
+  },
+  "$defs": {
+    "release": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "channel", "artifacts"],
+      "properties": {
+        "version": { "type": "string", "minLength": 1 },
+        "channel": { "enum": ["stable", "beta"] },
+        "artifacts": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/artifact" }
+        }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "architecture",
+        "minimumMacosVersion",
+        "bundleId",
+        "url",
+        "size",
+        "sha256"
+      ],
+      "properties": {
+        "architecture": {
+          "enum": ["aarch64-apple-darwin", "x86_64-apple-darwin"]
+        },
+        "minimumMacosVersion": { "type": "string", "minLength": 1 },
+        "bundleId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9.-]{1,200}$"
+        },
+        "url": { "type": "string", "pattern": "^https://" },
+        "size": { "type": "integer", "minimum": 1, "maximum": 1073741824 },
+        "sha256": { "type": "string", "pattern": "^[A-Fa-f0-9]{64}$" }
+      }
+    }
+  }
+}

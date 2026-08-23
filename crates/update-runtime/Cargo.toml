@@ -1,0 +1,38 @@
+[package]
+name = "update-runtime"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+base64.workspace = true
+ed25519-dalek.workspace = true
+hex.workspace = true
+libc.workspace = true
+plist.workspace = true
+semver.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+tempfile.workspace = true
+thiserror.workspace = true
+ureq.workspace = true
+url.workspace = true
+zeroize.workspace = true
+zip.workspace = true
+
+[dev-dependencies]
+ed25519-dalek = { workspace = true, features = ["rand_core"] }
+
+[[bin]]
+name = "sign-update-manifest"
+path = "src/bin/sign-update-manifest.rs"
+
+[[bin]]
+name = "generate-update-config"
+path = "src/bin/generate-update-config.rs"
+
+[[bin]]
+name = "validate-update-config"
+path = "src/bin/validate-update-config.rs"

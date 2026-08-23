@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "enabled": false,
+  "channel": "stable",
+  "manifestUrl": null,
+  "detachedSignatureUrl": null,
+  "keyId": null,
+  "publicKeyBase64": null,
+  "requireUserConfirmation": true,
+  "expectedBundleId": "app.agentfactory.desktop"
+}

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "valid": {
+      "type": "streamable-http",
+      "url": "https://example.com/mcp"
+    },
+    "reserved-env": {
+      "type": "stdio",
+      "command": "node",
+      "env": { "PLUGIN_ROOT": "/tmp/escape" }
+    },
+    "path-escape": {
+      "type": "stdio",
+      "command": "../outside/server"
+    },
+    "data-escape": {
+      "type": "stdio",
+      "command": "node",
+      "cwd": "${PLUGIN_DATA}/../escape"
+    },
+    "insecure-remote": {
+      "type": "streamable-http",
+      "url": "http://example.com/mcp"
+    },
+    "duplicate-header": {
+      "type": "streamable-http",
+      "url": "https://example.com/mcp",
+      "headers": { "Authorization": "one", "authorization": "two" }
+    }
+  }
+}

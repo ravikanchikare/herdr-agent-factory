@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentfactory.app/schemas/update-client-config-v1.schema.json",
+  "title": "Agent Factory update client config v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "enabled",
+    "channel",
+    "manifestUrl",
+    "detachedSignatureUrl",
+    "keyId",
+    "publicKeyBase64",
+    "requireUserConfirmation",
+    "expectedBundleId"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "enabled": { "type": "boolean" },
+    "channel": { "enum": ["stable", "beta"] },
+    "manifestUrl": { "type": ["string", "null"], "maxLength": 2048 },
+    "detachedSignatureUrl": {
+      "type": ["string", "null"],
+      "maxLength": 2048
+    },
+    "keyId": {
+      "type": ["string", "null"],
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9._-]+$"
+    },
+    "publicKeyBase64": {
+      "type": ["string", "null"],
+      "pattern": "^[A-Za-z0-9+/]{43}=$"
+    },
+    "requireUserConfirmation": { "const": true },
+    "expectedBundleId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "pattern": "^[A-Za-z0-9.-]+$"
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "enabled": { "const": true } } },
+      "then": {
+        "properties": {
+          "manifestUrl": { "type": "string" },
+          "detachedSignatureUrl": { "type": "string" },
+          "keyId": { "type": "string" },
+          "publicKeyBase64": { "type": "string" }
+        }
+      },
+      "else": {
+        "properties": {
+          "manifestUrl": { "type": "null" },
+          "detachedSignatureUrl": { "type": "null" },
+          "keyId": { "type": "null" },
+          "publicKeyBase64": { "type": "null" }
+        }
+      }
+    }
+  ]
+}
