@@ -1,0 +1,24 @@
+{
+  "name": "@agent-factory/registry-publisher",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "agent-factory-registry": "./src/index.mjs"
+  },
+  "scripts": {
+    "build": "node --check src/index.mjs",
+    "lint": "node --check src/index.mjs",
+    "typecheck": "node --check src/index.mjs",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "ajv": "8.17.1",
+    "ajv-formats": "3.0.1",
+    "tar": "7.5.22",
+    "yaml": "2.9.0"
+  },
+  "devDependencies": {
+    "tempy": "3.2.0"
+  }
+}

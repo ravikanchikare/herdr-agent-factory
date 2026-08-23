@@ -1,0 +1,42 @@
+{
+  "name": "agent-factory",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.11.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "pnpm dev:web",
+    "dev:web": "pnpm --filter @agent-factory/web-ui dev",
+    "runtime:build": "cargo build --package agent-factory-runtime",
+    "native:dev": "pnpm runtime:build && node scripts/native-sdk-command.mjs dev apps/native-host --yes",
+    "native:dev:clean": "cargo run -q -p agent-factory-runtime --bin dev-seed && pnpm native:dev",
+    "build": "pnpm schemas:validate && turbo run build && cargo build --workspace --release",
+    "native:build": "pnpm build && node scripts/native-sdk-command.mjs build apps/native-host --yes -Doptimize=ReleaseFast",
+    "native:package": "pnpm build && node scripts/native-package.mjs",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "pnpm test:web && pnpm test:rust && pnpm test:native-tooling && pnpm test:native",
+    "test:web": "turbo run test",
+    "test:rust": "cargo test --workspace",
+    "test:native-tooling": "node --test scripts/native-sdk-command.test.mjs",
+    "test:native": "node scripts/native-sdk-command.mjs test apps/native-host --yes",
+    "contracts:generate": "cargo run -p runtime-contract --bin generate-runtime-contracts",
+    "contracts:check": "cargo run -p runtime-contract --bin generate-runtime-contracts -- --check",
+    "schemas:validate": "pnpm contracts:check && node scripts/validate-schemas.mjs",
+    "validate": "pnpm schemas:validate && pnpm lint && pnpm typecheck && cargo fmt --all --check && cargo clippy --workspace --all-targets -- -D warnings && pnpm exec native validate apps/native-host/app.zon",
+    "smoke:web": "pnpm --filter @agent-factory/web-ui smoke",
+    "smoke": "pnpm smoke:web && pnpm test:native",
+    "changeset": "changeset",
+    "version-packages": "changeset version"
+  },
+  "devDependencies": {
+    "@changesets/cli": "2.29.7",
+    "@native-sdk/cli": "0.9.0",
+    "ajv": "8.17.1",
+    "ajv-formats": "3.0.1",
+    "turbo": "2.10.9",
+    "typescript": "6.0.3"
+  }
+}

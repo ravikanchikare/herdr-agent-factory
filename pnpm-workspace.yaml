@@ -1,0 +1,11 @@
+packages:
+  - "apps/*"
+  - "packages/shared/*"
+  - "tooling/*"
+
+onlyBuiltDependencies:
+  - "@swc/core"
+  - "esbuild"
+
+patchedDependencies:
+  "@native-sdk/cli@0.9.0": "patches/@native-sdk__cli@0.9.0.patch"

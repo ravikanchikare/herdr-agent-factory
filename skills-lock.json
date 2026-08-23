@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "skills": {
+    "ai-elements": {
+      "source": "vercel/ai-elements",
+      "sourceType": "github",
+      "skillPath": "skills/ai-elements/SKILL.md",
+      "computedHash": "6d7ccc65b98adb04d6c47632746dbfea55528903de9b027f6b39b80983d5aa55"
+    },
+    "herdr": {
+      "source": "herdrdev/herdr",
+      "sourceType": "github",
+      "skillPath": "skills/herdr/SKILL.md",
+      "computedHash": "489d2c6ff7e951e47071fbc5446d99d20ea215fcc5e55b9e4ceaa5a578f22d06"
+    },
+    "native-sdk": {
+      "source": "vercel-labs/native",
+      "sourceType": "github",
+      "skillPath": "skills/native-sdk/SKILL.md",
+      "computedHash": "5dd63137c8631e657ffbce3c0cd807d16173d4d2a08e7a80b2fa2d3c29283457"
+    },
+    "next-dev-loop": {
+      "source": "vercel/next.js",
+      "sourceType": "github",
+      "skillPath": "skills/next-dev-loop/SKILL.md",
+      "computedHash": "d6c10996c5c31b32faa269715852006922fa4357d1151403bb3a49dfa121bcfd"
+    },
+    "shadcn": {
+      "source": "shadcn/ui",
+      "sourceType": "github",
+      "skillPath": "skills/shadcn/SKILL.md",
+      "computedHash": "c1a68ee06a668aced9ab2b5fbdea5f989864123794eb2e056b339a072dbb7f10"
+    },
+    "vercel-react-best-practices": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/react-best-practices/SKILL.md",
+      "computedHash": "ca7b0c0c6e5f2750043f7f0cd72d16ac4e2abc48f9b5500d047a4b77a2506212"
+    }
+  }
+}
