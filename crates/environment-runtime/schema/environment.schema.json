@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentfactory.app/schemas/environment.schema.json",
+  "title": "Agent Factory environment",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "name",
+    "harnesses",
+    "plugins",
+    "permissions",
+    "environmentVariables",
+    "registries"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "id": {
+      "type": "string",
+      "maxLength": 64,
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "name": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "harnesses": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["coding", "evaluation"],
+      "properties": {
+        "coding": { "type": "string", "minLength": 1 },
+        "evaluation": { "type": "string", "minLength": 1 }
+      }
+    },
+    "plugins": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "enabledMcpServers", "defaultSkills"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1, "maxLength": 64 },
+          "enabledMcpServers": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "defaultSkills": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    },
+    "permissions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["trustedRead", "trustedWrite", "terminal"],
+      "properties": {
+        "trustedRead": { "enum": ["allow", "ask", "deny"] },
+        "trustedWrite": { "enum": ["allow", "ask", "deny"] },
+        "terminal": { "enum": ["allow", "ask", "deny"] }
+      }
+    },
+    "environmentVariables": {
+      "type": "object",
+      "propertyNames": {
+        "allOf": [
+          { "pattern": "^[A-Z_][A-Z0-9_]*$" },
+          {
+            "not": {
+              "enum": [
+                "AGENT_FACTORY_SESSION_ROLE",
+                "HOME",
+                "PATH",
+                "SHELL",
+                "TMPDIR"
+              ]
+            }
+          },
+          { "not": { "pattern": "^(?:DYLD_|LD_)" } },
+          { "not": { "pattern": "^ANTHROPIC_" } },
+          { "not": { "enum": ["CLAUDE_CODE_USE_BEDROCK", "CLAUDE_CODE_USE_VERTEX"] } }
+        ]
+      },
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["literal"],
+            "properties": {
+              "literal": { "type": "string", "maxLength": 65536 }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["secretRef"],
+            "properties": {
+              "secretRef": {
+                "type": "string",
+                "pattern": "^secret_[a-f0-9]{32}$"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "registries": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "maxLength": 64,
+        "pattern": "^(?!.*(?:--|\\.\\.))[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$"
+      }
+    },
+    "llm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["providerId", "allowedModels", "defaultModel"],
+      "properties": {
+        "providerId": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$"
+        },
+        "allowedModels": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1, "maxLength": 256 }
+        },
+        "defaultModel": { "type": "string", "minLength": 1, "maxLength": 256 }
+      }
+    }
+  }
+}

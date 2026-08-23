@@ -1,0 +1,14 @@
+[package]
+name = "llm-provider-runtime"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "Validated reusable LLM Provider configuration for Agent Factory"
+
+[dependencies]
+platform-secrets = { path = "../platform-secrets" }
+serde.workspace = true
+thiserror.workspace = true
+url.workspace = true
+

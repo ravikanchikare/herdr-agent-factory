@@ -1,0 +1,19 @@
+[package]
+name = "environment-runtime"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "Validated runtime environment definitions for Agent Factory"
+
+[dependencies]
+platform-secrets = { path = "../platform-secrets" }
+plugin-runtime = { path = "../plugin-runtime" }
+llm-provider-runtime = { path = "../llm-provider-runtime" }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+uuid.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
