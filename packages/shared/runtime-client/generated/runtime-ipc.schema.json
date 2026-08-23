@@ -1,0 +1,4953 @@
+{
+  "$defs": {
+    "AgentDraftIdParams": {
+      "additionalProperties": false,
+      "properties": {
+        "agentDraftId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "agentDraftId"
+      ],
+      "type": "object"
+    },
+    "AgentDraftLifecycle": {
+      "enum": [
+        "active",
+        "publishing",
+        "archived",
+        "cleanup_required"
+      ],
+      "type": "string"
+    },
+    "AgentDraftMutationResultDto": {
+      "properties": {
+        "draft": {
+          "$ref": "#/$defs/AgentDraftProjection"
+        },
+        "project": {
+          "$ref": "#/$defs/ProjectProjection"
+        },
+        "revision": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "workspaceBinding": {
+          "$ref": "#/$defs/WorkspaceBindingProjection"
+        }
+      },
+      "required": [
+        "draft",
+        "workspaceBinding",
+        "project",
+        "revision"
+      ],
+      "type": "object"
+    },
+    "AgentDraftProjection": {
+      "additionalProperties": false,
+      "properties": {
+        "acceptanceCriteria": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "baseVersion": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "branchRef": {
+          "type": "string"
+        },
+        "cleanupGuidance": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "createdAtUnixMs": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "environmentId": {
+          "description": "The Environment this Draft's next Run uses, as the user last chose it.\n\nA durable preference, not a promise: the Environment it names may since\nhave been deleted or stopped being ready, so a launch still resolves and\nvalidates it. `None` means nobody has chosen yet.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gitHead": {
+          "type": "string"
+        },
+        "id": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "lifecycle": {
+          "$ref": "#/$defs/AgentDraftLifecycle"
+        },
+        "name": {
+          "type": "string"
+        },
+        "objective": {
+          "type": "string"
+        },
+        "targetAgentId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "updatedAtUnixMs": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "workspaceBindingId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "worktreePath": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "targetAgentId",
+        "workspaceBindingId",
+        "name",
+        "objective",
+        "acceptanceCriteria",
+        "branchRef",
+        "worktreePath",
+        "gitHead",
+        "lifecycle",
+        "createdAtUnixMs",
+        "updatedAtUnixMs"
+      ],
+      "type": "object"
+    },
+    "AgentDraftPublishResultDto": {
+      "properties": {
+        "cleanupRequired": {
+          "type": "boolean"
+        },
+        "revision": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "version": {
+          "$ref": "#/$defs/TargetAgentVersionProjection"
+        }
+      },
+      "required": [
+        "version",
+        "cleanupRequired",
+        "revision"
+      ],
+      "type": "object"
+    },
+    "AgentDraftWorkspaceResultDto": {
+      "properties": {
+        "agentDraftId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "alreadyOpen": {
+          "type": "boolean"
+        },
+        "label": {
+          "type": "string"
+        },
+        "revision": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "terminal": {
+          "$ref": "#/$defs/HerdrWorkspaceTerminalLaunchDto"
+        },
+        "workspaceId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "agentDraftId",
+        "workspaceId",
+        "label",
+        "alreadyOpen",
+        "terminal",
+        "revision"
+      ],
+      "type": "object"
+    },
+    "AgentLifecycle": {
+      "description": "The lifecycle Herdr reports for a live agent.",
+      "oneOf": [
+        {
+          "const": "idle",
+          "description": "Ready for input.",
+          "type": "string"
+        },
+        {
+          "const": "working",
+          "description": "Producing output.",
+          "type": "string"
+        },
+        {
+          "const": "blocked",
+          "description": "Herdr recognized an approval or question surface inside the agent.",
+          "type": "string"
+        },
+        {
+          "const": "done",
+          "description": "Unseen background work finished.",
+          "type": "string"
+        },
+        {
+          "const": "unknown",
+          "description": "Herdr sees the agent but cannot classify it confidently.",
+          "type": "string"
+        }
+      ]
+    },
+    "AgentSessionAcceptedResultDto": {
+      "properties": {
+        "accepted": {
+          "type": "boolean"
+        },
+        "agentSessionId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "agentSessionId",
+        "accepted"
+      ],
+      "type": "object"
+    },
+    "AgentSessionIdParams": {
+      "additionalProperties": false,
+      "properties": {
+        "agentSessionId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "agentSessionId"
+      ],
+      "type": "object"
+    },
+    "AgentSessionInterruptResultDto": {
+      "properties": {
+        "agentSessionId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "interrupted": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "agentSessionId",
+        "interrupted"
+      ],
+      "type": "object"
+    },
+    "AgentSessionProjection": {
+      "additionalProperties": false,
+      "description": "Durable Factory-managed session lineage joined with a fresh Herdr\nobservation when its agent still exists.",
+      "properties": {
+        "attention": {
+          "description": "What Herdr says the agent is waiting on while it is blocked.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "availability": {
+          "$ref": "#/$defs/SessionAvailability"
+        },
+        "briefDelivered": {
+          "default": false,
+          "description": "Whether the agent has actually accepted [`Self::initial_prompt`].\n\nThis is durable state of its own rather than a lifecycle value, because\n`lifecycle` reflects Herdr and Herdr reports an agent sitting on its\nstartup screen as idle. Encoding \"the brief has not landed\" as a\nlifecycle would put two writers on one field, and reconciling against\nHerdr would silently strand the brief.",
+          "type": "boolean"
+        },
+        "createdAtUnixMs": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "effectiveModel": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "environmentId": {
+          "type": "string"
+        },
+        "factoryRunId": {
+          "format": "uuid",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "harnessId": {
+          "description": "The Herdr agent kind this session runs.",
+          "type": "string"
+        },
+        "herdrAgentName": {
+          "description": "Stable correlation identity retained after the Herdr object disappears.",
+          "type": "string"
+        },
+        "id": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "initialPrompt": {
+          "description": "First prompt sent to this session. Later prompts do not replace it.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "lastActivityAtUnixMs": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "lifecycle": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AgentLifecycle"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "llmProviderSnapshot": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ResolvedLlmProviderDto"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outcome": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ManagedSessionOutcome"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "parentSessionId": {
+          "format": "uuid",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "placement": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HerdrPlacement"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "projectId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "purpose": {
+          "$ref": "#/$defs/HarnessPurpose"
+        },
+        "targetAgentId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "workspaceBindingId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "targetAgentId",
+        "workspaceBindingId",
+        "projectId",
+        "environmentId",
+        "harnessId",
+        "purpose",
+        "herdrAgentName",
+        "availability",
+        "title",
+        "createdAtUnixMs",
+        "lastActivityAtUnixMs",
+        "attention"
+      ],
+      "type": "object"
+    },
+    "AgentSessionResultDto": {
+      "properties": {
+        "reused": {
+          "description": "Whether an open draft was reused instead of creating a new session.",
+          "type": "boolean"
+        },
+        "revision": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "session": {
+          "$ref": "#/$defs/AgentSessionProjection"
+        }
+      },
+      "required": [
+        "session",
+        "reused",
+        "revision"
+      ],
+      "type": "object"
+    },
+    "AgentSessionStopResultDto": {
+      "properties": {
+        "agentSessionId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "stopped": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "agentSessionId",
+        "stopped"
+      ],
+      "type": "object"
+    },
+    "AgentTranscriptProjection": {
+      "additionalProperties": false,
+      "description": "A pane transcript captured from Herdr on demand.",
+      "properties": {
+        "agentSessionId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "capturedAtUnixMs": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "revision": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "text": {
+          "type": "string"
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "agentSessionId",
+        "text",
+        "revision",
+        "truncated",
+        "capturedAtUnixMs"
+      ],
+      "type": "object"
+    },
+    "AgentTranscriptResultDto": {
+      "properties": {
+        "transcript": {
+          "$ref": "#/$defs/AgentTranscriptProjection"
+        }
+      },
+      "required": [
+        "transcript"
+      ],
+      "type": "object"
+    },
+    "ApplicationProjection": {
+      "properties": {
+        "activeAgentSessionId": {
+          "format": "uuid",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "activeProjectId": {
+          "format": "uuid",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "activeRunId": {
+          "format": "uuid",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "agentSessions": {
+          "items": {
+            "$ref": "#/$defs/AgentSessionProjection"
+          },
+          "type": "array"
+        },
+        "environments": {
+          "items": {
+            "$ref": "#/$defs/EnvironmentProjection"
+          },
+          "type": "array"
+        },
+        "factoryRuns": {
+          "items": {
+            "$ref": "#/$defs/FactoryRun"
+          },
+          "type": "array"
+        },
+        "harnesses": {
+          "items": {
+            "$ref": "#/$defs/HarnessProjection"
+          },
+          "type": "array"
+        },
+        "herdr": {
+          "$ref": "#/$defs/HerdrStatusProjection"
+        },
+        "liveAgents": {
+          "items": {
+            "$ref": "#/$defs/LiveAgentProjection"
+          },
+          "type": "array"
+        },
+        "llmProviders": {
+          "items": {
+            "$ref": "#/$defs/LlmProviderDto"
+          },
+          "type": "array"
+        },
+        "projects": {
+          "items": {
+            "$ref": "#/$defs/ProjectProjection"
+          },
+          "type": "array"
+        },
+        "revision": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "settings": {
+          "$ref": "#/$defs/SettingsProjection"
+        },
+        "targetWorkspace": {
+          "$ref": "#/$defs/TargetWorkspaceProjection"
+        }
+      },
+      "required": [
+        "revision",
+        "settings",
+        "projects",
+        "llmProviders",
+        "environments",
+        "herdr",
+        "harnesses",
+        "agentSessions",
+        "liveAgents",
+        "factoryRuns",
+        "targetWorkspace"
+      ],
+      "type": "object"
+    },
+    "AuthorityFreshness": {
+      "description": "Whether Herdr itself is reachable, and on a protocol Agent Factory supports.",
+      "enum": [
+        "live",
+        "reconnecting",
+        "last_observed"
+      ],
+      "type": "string"
+    },
+    "ChangedFile": {
+      "properties": {
+        "afterHash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "beforeHash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "change": {
+          "$ref": "#/$defs/ChangedFileKind"
+        },
+        "diff": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StructuredTextDiff"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "change"
+      ],
+      "type": "object"
+    },
+    "ChangedFileKind": {
+      "enum": [
+        "added",
+        "modified",
+        "deleted"
+      ],
+      "type": "string"
+    },
+    "ConfirmUpdateParams": {
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "version"
+      ],
+      "type": "object"
+    },
+    "CreateAgentDraftParams": {
+      "additionalProperties": false,
+      "properties": {
+        "baseVersionId": {
+          "format": "uuid",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "draftName": {
+          "type": "string"
+        },
+        "targetAgentId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "targetAgentId",
+        "draftName"
+      ],
+      "type": "object"
+    },
+    "CreateAgentSessionParams": {
+      "additionalProperties": false,
+      "properties": {
+        "environmentId": {
+          "type": "string"
+        },
+        "model": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "purpose": {
+          "$ref": "#/$defs/HarnessPurpose"
+        },
+        "targetAgentId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "workspaceBindingId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "targetAgentId",
+        "workspaceBindingId",
+        "environmentId",
+        "purpose"
+      ],
+      "type": "object"
+    },
+    "CreateEnvironmentParams": {
+      "additionalProperties": false,
+      "properties": {
+        "configuration": {
+          "$ref": "#/$defs/EnvironmentConfigurationDraft"
+        }
+      },
+      "required": [
+        "configuration"
+      ],
+      "type": "object"
+    },
+    "CreateFactoryRunParams": {
+      "additionalProperties": false,
+      "properties": {
+        "agentDraftId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "environmentId": {
+          "type": "string"
+        },
+        "runId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "runId",
+        "agentDraftId",
+        "environmentId"
+      ],
+      "type": "object"
+    },
+    "CreateLlmProviderParams": {
+      "additionalProperties": false,
+      "properties": {
+        "configuration": {
+          "$ref": "#/$defs/LlmProviderConfigurationDto"
+        }
+      },
+      "required": [
+        "configuration"
+      ],
+      "type": "object"
+    },
+    "CreateProjectParams": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "root": {
+          "type": "string"
+        },
+        "trusted": {
+          "default": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "root"
+      ],
+      "type": "object"
+    },
+    "CreateSecretParams": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "value"
+      ],
+      "type": "object"
+    },
+    "CreateTargetAgentParams": {
+      "additionalProperties": false,
+      "properties": {
+        "acceptanceCriteria": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "draftName": {
+          "type": "string"
+        },
+        "environmentId": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "objective": {
+          "type": "string"
+        },
+        "repositoryRoot": {
+          "type": "string"
+        },
+        "startRun": {
+          "default": false,
+          "type": "boolean"
+        },
+        "trusted": {
+          "default": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "objective",
+        "acceptanceCriteria",
+        "repositoryRoot",
+        "draftName"
+      ],
+      "type": "object"
+    },
+    "CreateWorkspaceTerminalParams": {
+      "additionalProperties": false,
+      "properties": {
+        "cols": {
+          "default": 80,
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "rows": {
+          "default": 24,
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "workContextId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "workContextId"
+      ],
+      "type": "object"
+    },
+    "CredentialKindDto": {
+      "enum": [
+        "api_token"
+      ],
+      "type": "string"
+    },
+    "DeleteEnvironmentParams": {
+      "additionalProperties": false,
+      "properties": {
+        "environmentId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "environmentId"
+      ],
+      "type": "object"
+    },
+    "DeleteLlmProviderParams": {
+      "additionalProperties": false,
+      "properties": {
+        "providerId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "providerId"
+      ],
+      "type": "object"
+    },
+    "DeleteSecretParams": {
+      "additionalProperties": false,
+      "properties": {
+        "secretRef": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "secretRef"
+      ],
+      "type": "object"
+    },
+    "DiffFilesParams": {
+      "additionalProperties": false,
+      "properties": {
+        "afterPath": {
+          "type": "string"
+        },
+        "beforePath": {
+          "type": "string"
+        },
+        "contextLines": {
+          "default": 3,
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "beforePath",
+        "afterPath"
+      ],
+      "type": "object"
+    },
+    "DiffHunk": {
+      "properties": {
+        "lines": {
+          "items": {
+            "$ref": "#/$defs/DiffLine"
+          },
+          "type": "array"
+        },
+        "newLines": {
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "newStart": {
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "oldLines": {
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "oldStart": {
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "oldStart",
+        "oldLines",
+        "newStart",
+        "newLines",
+        "lines"
+      ],
+      "type": "object"
+    },
+    "DiffLine": {
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/DiffLineKind"
+        },
+        "newLine": {
+          "format": "uint",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "oldLine": {
+          "format": "uint",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "text"
+      ],
+      "type": "object"
+    },
+    "DiffLineKind": {
+      "enum": [
+        "context",
+        "delete",
+        "insert"
+      ],
+      "type": "string"
+    },
+    "DirectoryEntry": {
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/EntryKind"
+        },
+        "name": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "size": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "path",
+        "kind",
+        "size"
+      ],
+      "type": "object"
+    },
+    "DirectoryPage": {
+      "properties": {
+        "entries": {
+          "items": {
+            "$ref": "#/$defs/DirectoryEntry"
+          },
+          "type": "array"
+        },
+        "nextCursor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "entries"
+      ],
+      "type": "object"
+    },
+    "EmptyParams": {
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "EntryKind": {
+      "enum": [
+        "file",
+        "directory",
+        "symlink",
+        "other"
+      ],
+      "type": "string"
+    },
+    "EnvironmentConfigurationDraft": {
+      "additionalProperties": false,
+      "description": "An Environment's complete configuration, as authored in one form.\n\nCreating and saving carry the same payload so there is exactly one shape to\nreason about, and a save can never land a mix of two edits. Note the absence\nof an id: it is derived from the name by the runtime and is stable across\nrenames.\n\nAgents and permission policies are deliberately not here — they remain\nruntime-owned constants rather than form fields.",
+      "properties": {
+        "environmentVariables": {
+          "items": {
+            "$ref": "#/$defs/EnvironmentVariableProjection"
+          },
+          "type": "array"
+        },
+        "llm": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EnvironmentLlmPolicyDto"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "permissions": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EnvironmentPermissionProjection"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "How much an agent in this Environment may do without being asked.\nOmitted means the cautious default: reads allowed, writes and terminal\nuse ask. A Factory Run only advances unattended when both are allowed."
+        },
+        "plugins": {
+          "items": {
+            "$ref": "#/$defs/EnvironmentPluginProjection"
+          },
+          "type": "array"
+        },
+        "registries": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "environmentVariables",
+        "plugins",
+        "registries"
+      ],
+      "type": "object"
+    },
+    "EnvironmentCreateResultDto": {
+      "properties": {
+        "environmentId": {
+          "description": "The id the runtime derived from the name. The caller had no way to\npredict it, so it is reported rather than assumed.",
+          "type": "string"
+        },
+        "environments": {
+          "items": {
+            "$ref": "#/$defs/EnvironmentProjection"
+          },
+          "type": "array"
+        },
+        "revision": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "environmentId",
+        "environments",
+        "revision"
+      ],
+      "type": "object"
+    },
+    "EnvironmentLlmPolicyDto": {
+      "additionalProperties": false,
+      "properties": {
+        "allowedModels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "defaultModel": {
+          "type": "string"
+        },
+        "providerId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "providerId",
+        "allowedModels",
+        "defaultModel"
+      ],
+      "type": "object"
+    },
+    "EnvironmentPermissionPolicy": {
+      "enum": [
+        "allow",
+        "ask",
+        "deny"
+      ],
+      "type": "string"
+    },
+    "EnvironmentPermissionProjection": {
+      "additionalProperties": false,
+      "properties": {
+        "terminal": {
+          "$ref": "#/$defs/EnvironmentPermissionPolicy"
+        },
+        "trustedRead": {
+          "$ref": "#/$defs/EnvironmentPermissionPolicy"
+        },
+        "trustedWrite": {
+          "$ref": "#/$defs/EnvironmentPermissionPolicy"
+        }
+      },
+      "required": [
+        "trustedRead",
+        "trustedWrite",
+        "terminal"
+      ],
+      "type": "object"
+    },
+    "EnvironmentPluginProjection": {
+      "additionalProperties": false,
+      "properties": {
+        "defaultSkills": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "enabledMcpServers": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "enabledMcpServers",
+        "defaultSkills"
+      ],
+      "type": "object"
+    },
+    "EnvironmentProjection": {
+      "properties": {
+        "codingHarnessId": {
+          "type": "string"
+        },
+        "environmentVariables": {
+          "items": {
+            "$ref": "#/$defs/EnvironmentVariableProjection"
+          },
+          "type": "array"
+        },
+        "evaluationHarnessId": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "llm": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EnvironmentLlmPolicyDto"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "llmNeedsSetup": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "permissions": {
+          "$ref": "#/$defs/EnvironmentPermissionProjection"
+        },
+        "plugins": {
+          "items": {
+            "$ref": "#/$defs/EnvironmentPluginProjection"
+          },
+          "type": "array"
+        },
+        "readiness": {
+          "$ref": "#/$defs/EnvironmentReadinessProjection"
+        },
+        "registryIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "resolvedLlm": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ResolvedLlmProviderDto"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "codingHarnessId",
+        "evaluationHarnessId",
+        "plugins",
+        "permissions",
+        "registryIds",
+        "environmentVariables",
+        "llmNeedsSetup",
+        "readiness"
+      ],
+      "type": "object"
+    },
+    "EnvironmentReadinessProjection": {
+      "additionalProperties": false,
+      "properties": {
+        "issues": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "state": {
+          "$ref": "#/$defs/EnvironmentReadinessState"
+        }
+      },
+      "required": [
+        "state",
+        "issues"
+      ],
+      "type": "object"
+    },
+    "EnvironmentReadinessState": {
+      "enum": [
+        "ready",
+        "needs_setup"
+      ],
+      "type": "string"
+    },
+    "EnvironmentVariableProjection": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/EnvironmentVariableSource"
+        },
+        "value": {
+          "description": "Literal values are shown as-is. Secret values are represented only by\ntheir opaque Keychain reference.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "source",
+        "value"
+      ],
+      "type": "object"
+    },
+    "EnvironmentVariableSource": {
+      "enum": [
+        "literal",
+        "secret"
+      ],
+      "type": "string"
+    },
+    "EnvironmentsResultDto": {
+      "description": "The result of every Environment mutation, and the `environment.changed` event payload.\n\nOne shape for all of them: a delete has no single Environment to report, and\na create needs the whole list anyway to place the new Environment in order.",
+      "properties": {
+        "environments": {
+          "items": {
+            "$ref": "#/$defs/EnvironmentProjection"
+          },
+          "type": "array"
+        },
+        "revision": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "environments",
+        "revision"
+      ],
+      "type": "object"
+    },
+    "ErrorBody": {
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/ErrorCode"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "type": "object"
+    },
+    "ErrorCode": {
+      "enum": [
+        "invalid_request",
+        "method_not_found",
+        "invalid_params",
+        "conflict",
+        "internal"
+      ],
+      "type": "string"
+    },
+    "EvaluationResult": {
+      "properties": {
+        "findings": {
+          "items": {
+            "$ref": "#/$defs/EvaluatorFinding"
+          },
+          "type": "array"
+        },
+        "protocolValid": {
+          "type": "boolean"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "validationError": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "verdict": {
+          "$ref": "#/$defs/Verdict"
+        }
+      },
+      "required": [
+        "verdict",
+        "summary",
+        "findings",
+        "protocolValid"
+      ],
+      "type": "object"
+    },
+    "EvaluatorFinding": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence": {
+          "type": "string"
+        },
+        "file": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "line": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "severity": {
+          "$ref": "#/$defs/FindingSeverity"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "severity",
+        "title",
+        "evidence"
+      ],
+      "type": "object"
+    },
+    "EvaluatorVerdict": {
+      "additionalProperties": false,
+      "properties": {
+        "findings": {
+          "items": {
+            "$ref": "#/$defs/EvaluatorFinding"
+          },
+          "type": "array"
+        },
+        "schemaVersion": {
+          "format": "uint32",
+          "maximum": 1,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "verdict": {
+          "$ref": "#/$defs/Verdict"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "verdict",
+        "summary",
+        "findings"
+      ],
+      "type": "object"
+    },
+    "Event": {
+      "properties": {
+        "payload": true,
+        "revision": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "sequence": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "topic": {
+          "type": "string"
+        },
+        "version": {
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "version",
+        "sequence",
+        "revision",
+        "topic",
+        "payload"
+      ],
+      "type": "object"
+    },
+    "FactoryRun": {
+      "properties": {
+        "acceptanceCriteria": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "agentDraftId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "changedFiles": {
+          "items": {
+            "$ref": "#/$defs/ChangedFile"
+          },
+          "type": "array"
+        },
+        "completedAtUnixMs": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "environmentId": {
+          "type": "string"
+        },
+        "escalation": {
+          "description": "What the Orchestrator stopped to ask a person.\n\nA Factory Run advances unattended, so this is the one thing that should\npull someone back to it. The Orchestrator stays live in its pane while\nthis is set: the answer is typed to it directly, and it clears the\nquestion by making its next move.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "evaluation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EvaluationResult"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "finalGitHead": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "objective": {
+          "type": "string"
+        },
+        "projectId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "startingGitHead": {
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/FactoryRunState"
+        },
+        "targetAgentId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "testEvidence": {
+          "items": {
+            "$ref": "#/$defs/TestEvidence"
+          },
+          "type": "array"
+        },
+        "workspaceBindingId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "targetAgentId",
+        "agentDraftId",
+        "workspaceBindingId",
+        "projectId",
+        "environmentId",
+        "objective",
+        "acceptanceCriteria",
+        "startingGitHead",
+        "changedFiles",
+        "testEvidence",
+        "state"
+      ],
+      "type": "object"
+    },
+    "FactoryRunState": {
+      "enum": [
+        "draft",
+        "orchestrating",
+        "coding",
+        "evaluating",
+        "escalated",
+        "passed",
+        "failed",
+        "needs_review",
+        "cancelled"
+      ],
+      "type": "string"
+    },
+    "FileKind": {
+      "enum": [
+        "text",
+        "binary"
+      ],
+      "type": "string"
+    },
+    "FileRead": {
+      "properties": {
+        "content": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "kind": {
+          "$ref": "#/$defs/FileKind"
+        },
+        "path": {
+          "type": "string"
+        },
+        "size": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "path",
+        "size",
+        "kind",
+        "truncated"
+      ],
+      "type": "object"
+    },
+    "FindingSeverity": {
+      "enum": [
+        "critical",
+        "major",
+        "minor",
+        "note"
+      ],
+      "type": "string"
+    },
+    "Frame": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/Hello",
+          "properties": {
+            "kind": {
+              "const": "hello",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "type": "object"
+        },
+        {
+          "$ref": "#/$defs/Ready",
+          "properties": {
+            "kind": {
+              "const": "ready",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "type": "object"
+        },
+        {
+          "$ref": "#/$defs/Request",
+          "properties": {
+            "kind": {
+              "const": "request",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "type": "object"
+        },
+        {
+          "$ref": "#/$defs/Response",
+          "properties": {
+            "kind": {
+              "const": "response",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "type": "object"
+        },
+        {
+          "$ref": "#/$defs/Event",
+          "properties": {
+            "kind": {
+              "const": "event",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "type": "object"
+        },
+        {
+          "$ref": "#/$defs/Shutdown",
+          "properties": {
+            "kind": {
+              "const": "shutdown",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "HarnessActionProjection": {
+      "additionalProperties": false,
+      "description": "A command the user can copy and run outside Agent Factory.",
+      "properties": {
+        "command": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "command"
+      ],
+      "type": "object"
+    },
+    "HarnessChangedEventDto": {
+      "description": "Herdr connectivity after the runtime reopens a lost subscription.\n\nHerdr reachability is derived at projection time rather than stored, so\nwithout this event the UI keeps whatever it learned from the launch-time\n`harness.list` and reports Herdr as unavailable until the user reloads.",
+      "properties": {
+        "payload": {
+          "$ref": "#/$defs/HarnessListDto"
+        },
+        "revision": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "sequence": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "topic": {
+          "$ref": "#/$defs/HarnessEventTopic"
+        },
+        "version": {
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "version",
+        "sequence",
+        "revision",
+        "topic",
+        "payload"
+      ],
+      "type": "object"
+    },
+    "HarnessEventTopic": {
+      "enum": [
+        "harness.changed"
+      ],
+      "type": "string"
+    },
+    "HarnessListDto": {
+      "properties": {
+        "harnesses": {
+          "items": {
+            "$ref": "#/$defs/HarnessProjection"
+          },
+          "type": "array"
+        },
+        "herdr": {
+          "$ref": "#/$defs/HerdrStatusProjection",
+          "description": "Agent kinds Herdr can launch, and whether Herdr itself is reachable."
+        }
+      },
+      "required": [
+        "herdr",
+        "harnesses"
+      ],
+      "type": "object"
+    },
+    "HarnessProjection": {
+      "additionalProperties": false,
+      "description": "A Harness is an allowlisted Herdr agent kind presented to the user.\n\nSupport and readiness come from the intersection of Agent Factory's\nsupported-manifest seed and Herdr's agent manifests. Agent Factory never\nprobes `PATH` for agent executables itself.",
+      "properties": {
+        "action": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HarnessActionProjection"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "guidance": {
+          "type": "string"
+        },
+        "id": {
+          "description": "The Herdr agent kind, such as `claude` or `codex`.",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "readiness": {
+          "$ref": "#/$defs/HarnessReadinessState"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "readiness",
+        "guidance"
+      ],
+      "type": "object"
+    },
+    "HarnessPurpose": {
+      "enum": [
+        "orchestration",
+        "coding",
+        "evaluation"
+      ],
+      "type": "string"
+    },
+    "HarnessReadinessState": {
+      "description": "The human-facing readiness of an Agent Factory-supported Harness.",
+      "enum": [
+        "ready",
+        "setup_required",
+        "installation_required"
+      ],
+      "type": "string"
+    },
+    "Hello": {
+      "properties": {
+        "host_name": {
+          "type": "string"
+        },
+        "host_version": {
+          "type": "string"
+        },
+        "version": {
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "version",
+        "host_name",
+        "host_version"
+      ],
+      "type": "object"
+    },
+    "HerdrPlacement": {
+      "additionalProperties": false,
+      "description": "Where a session lives inside Herdr's topology.",
+      "properties": {
+        "agentName": {
+          "description": "The unique Herdr agent name; the handle every control call targets.",
+          "type": "string"
+        },
+        "paneId": {
+          "type": "string"
+        },
+        "tabId": {
+          "type": "string"
+        },
+        "workspaceId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "workspaceId",
+        "tabId",
+        "paneId",
+        "agentName"
+      ],
+      "type": "object"
+    },
+    "HerdrStatusProjection": {
+      "additionalProperties": false,
+      "properties": {
+        "connected": {
+          "type": "boolean"
+        },
+        "freshness": {
+          "$ref": "#/$defs/AuthorityFreshness"
+        },
+        "issues": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "observedAtUnixMs": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "protocol": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "session": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "connected",
+        "freshness",
+        "issues"
+      ],
+      "type": "object"
+    },
+    "HerdrWorkspaceTerminalLaunchDto": {
+      "properties": {
+        "arguments": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "executable": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "executable",
+        "arguments"
+      ],
+      "type": "object"
+    },
+    "InstallPluginParams": {
+      "additionalProperties": false,
+      "description": "Origin of a previewed registry public key.\nCandidate registry fields resolved from a repository URL for review.",
+      "properties": {
+        "pluginId": {
+          "type": "string"
+        },
+        "registryId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "registryId",
+        "pluginId"
+      ],
+      "type": "object"
+    },
+    "InstalledMcpServerDto": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/InstalledMcpServerKindDto"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "kind"
+      ],
+      "type": "object"
+    },
+    "InstalledMcpServerKindDto": {
+      "enum": [
+        "stdio",
+        "streamableHttp",
+        "sse"
+      ],
+      "type": "string"
+    },
+    "InstalledPluginDto": {
+      "additionalProperties": false,
+      "properties": {
+        "activeVersion": {
+          "type": "string"
+        },
+        "mcpDisabledReason": {
+          "description": "Set when the plugin's MCP component was present but disabled at load time\n(e.g. an unsafe entry); the offered server list is then empty.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "mcpServers": {
+          "description": "MCP servers the installed plugin offers (read from mcp.json). The environment's\n`enabledMcpServers` selection picks a subset of these names.",
+          "items": {
+            "$ref": "#/$defs/InstalledMcpServerDto"
+          },
+          "type": "array"
+        },
+        "name": {
+          "type": "string"
+        },
+        "previousVersion": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "skills": {
+          "description": "Skills the installed plugin offers (read from SKILL.md frontmatter). The\nenvironment's `defaultSkills` selection picks a subset of these names.",
+          "items": {
+            "$ref": "#/$defs/InstalledSkillDto"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "activeVersion",
+        "skills",
+        "mcpServers"
+      ],
+      "type": "object"
+    },
+    "InstalledSkillDto": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "description"
+      ],
+      "type": "object"
+    },
+    "LayoutProjection": {
+      "additionalProperties": false,
+      "properties": {
+        "inspectorPercent": {
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "terminalPercent": {
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "inspectorPercent",
+        "terminalPercent"
+      ],
+      "type": "object"
+    },
+    "ListFilesParams": {
+      "additionalProperties": false,
+      "properties": {
+        "cursor": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "pageSize": {
+          "default": 100,
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "type": "object"
+    },
+    "ListLlmProviderModelsParams": {
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "$ref": "#/$defs/LlmProviderConnectionDto"
+        },
+        "providerId": {
+          "format": "uuid",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "provider"
+      ],
+      "type": "object"
+    },
+    "ListVersionFilesParams": {
+      "additionalProperties": false,
+      "properties": {
+        "versionId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "versionId"
+      ],
+      "type": "object"
+    },
+    "LiveAgentProjection": {
+      "additionalProperties": false,
+      "description": "Every agent Herdr currently reports in a Factory-managed Workspace.\n`managed_session_id` is absent for other runtime activity.",
+      "properties": {
+        "agentKind": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "agentName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "attention": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "displayAgent": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "factoryRunId": {
+          "format": "uuid",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "lifecycle": {
+          "$ref": "#/$defs/AgentLifecycle"
+        },
+        "managedSessionId": {
+          "format": "uuid",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "observedAtUnixMs": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "placement": {
+          "$ref": "#/$defs/HerdrPlacement"
+        },
+        "purpose": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HarnessPurpose"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "revision": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "workspaceBindingId": {
+          "format": "uuid",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "lifecycle",
+        "placement",
+        "attention",
+        "revision",
+        "observedAtUnixMs"
+      ],
+      "type": "object"
+    },
+    "LlmProviderConfigurationDto": {
+      "additionalProperties": false,
+      "properties": {
+        "allowedModels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "credentialRef": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/LlmProviderType"
+        }
+      },
+      "required": [
+        "name",
+        "type",
+        "endpoint",
+        "allowedModels"
+      ],
+      "type": "object"
+    },
+    "LlmProviderConnectionDto": {
+      "additionalProperties": false,
+      "properties": {
+        "credentialRef": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/LlmProviderType"
+        }
+      },
+      "required": [
+        "type",
+        "endpoint"
+      ],
+      "type": "object"
+    },
+    "LlmProviderCreateResultDto": {
+      "properties": {
+        "environments": {
+          "items": {
+            "$ref": "#/$defs/EnvironmentProjection"
+          },
+          "type": "array"
+        },
+        "providerId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "providers": {
+          "items": {
+            "$ref": "#/$defs/LlmProviderDto"
+          },
+          "type": "array"
+        },
+        "revision": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "providerId",
+        "providers",
+        "environments",
+        "revision"
+      ],
+      "type": "object"
+    },
+    "LlmProviderDto": {
+      "additionalProperties": false,
+      "properties": {
+        "allowedModels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "credentialRef": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "id": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "readiness": {
+          "$ref": "#/$defs/LlmProviderReadinessProjection"
+        },
+        "type": {
+          "$ref": "#/$defs/LlmProviderType"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "type",
+        "endpoint",
+        "allowedModels",
+        "readiness"
+      ],
+      "type": "object"
+    },
+    "LlmProviderModelsDto": {
+      "properties": {
+        "models": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "providerId": {
+          "format": "uuid",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "models"
+      ],
+      "type": "object"
+    },
+    "LlmProviderReadinessProjection": {
+      "additionalProperties": false,
+      "properties": {
+        "issues": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "state": {
+          "$ref": "#/$defs/EnvironmentReadinessState"
+        }
+      },
+      "required": [
+        "state",
+        "issues"
+      ],
+      "type": "object"
+    },
+    "LlmProviderType": {
+      "enum": [
+        "ollama",
+        "litellm",
+        "meta",
+        "openai"
+      ],
+      "type": "string"
+    },
+    "LlmProvidersResultDto": {
+      "properties": {
+        "environments": {
+          "items": {
+            "$ref": "#/$defs/EnvironmentProjection"
+          },
+          "type": "array"
+        },
+        "providers": {
+          "items": {
+            "$ref": "#/$defs/LlmProviderDto"
+          },
+          "type": "array"
+        },
+        "revision": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "providers",
+        "environments",
+        "revision"
+      ],
+      "type": "object"
+    },
+    "LocalMcpServerDto": {
+      "additionalProperties": false,
+      "properties": {
+        "args": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "command": {
+          "type": "string"
+        },
+        "cwd": {
+          "type": "string"
+        },
+        "environmentId": {
+          "type": "string"
+        },
+        "environmentKeys": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "fingerprint": {
+          "type": "string"
+        },
+        "pluginName": {
+          "type": "string"
+        },
+        "serverName": {
+          "type": "string"
+        },
+        "trustClass": {
+          "type": "string"
+        },
+        "trusted": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "environmentId",
+        "pluginName",
+        "serverName",
+        "command",
+        "args",
+        "cwd",
+        "environmentKeys",
+        "trustClass",
+        "fingerprint",
+        "trusted"
+      ],
+      "type": "object"
+    },
+    "LocalMcpTrustParams": {
+      "additionalProperties": false,
+      "properties": {
+        "environmentId": {
+          "type": "string"
+        },
+        "fingerprint": {
+          "type": "string"
+        },
+        "pluginName": {
+          "type": "string"
+        },
+        "serverName": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "environmentId",
+        "pluginName",
+        "serverName",
+        "fingerprint"
+      ],
+      "type": "object"
+    },
+    "ManagedSessionOutcome": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/ManagedSessionOutcomeKind"
+        },
+        "recordedAtUnixMs": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "summary": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "recordedAtUnixMs"
+      ],
+      "type": "object"
+    },
+    "ManagedSessionOutcomeKind": {
+      "enum": [
+        "completed",
+        "stopped",
+        "interrupted",
+        "failed"
+      ],
+      "type": "string"
+    },
+    "MoveWorkspacePaneParams": {
+      "additionalProperties": false,
+      "properties": {
+        "position": {
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "workspacePaneId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "workspacePaneId",
+        "position"
+      ],
+      "type": "object"
+    },
+    "NotificationCategory": {
+      "enum": [
+        "session_completed",
+        "session_blocked",
+        "session_failed",
+        "factory_run_passed",
+        "factory_run_failed",
+        "factory_run_needs_review"
+      ],
+      "type": "string"
+    },
+    "NotificationEventTopic": {
+      "enum": [
+        "notification.requested"
+      ],
+      "type": "string"
+    },
+    "NotificationRequestedDto": {
+      "additionalProperties": false,
+      "properties": {
+        "body": {
+          "type": "string"
+        },
+        "category": {
+          "$ref": "#/$defs/NotificationCategory"
+        },
+        "entityId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "body",
+        "category",
+        "entityId"
+      ],
+      "type": "object"
+    },
+    "NotificationRequestedEventDto": {
+      "properties": {
+        "payload": {
+          "$ref": "#/$defs/NotificationRequestedDto"
+        },
+        "revision": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "sequence": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "topic": {
+          "$ref": "#/$defs/NotificationEventTopic"
+        },
+        "version": {
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "version",
+        "sequence",
+        "revision",
+        "topic",
+        "payload"
+      ],
+      "type": "object"
+    },
+    "OpenWorkspaceItemParams": {
+      "additionalProperties": false,
+      "properties": {
+        "targetAgentId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "workItemId": {
+          "default": null,
+          "format": "uuid",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "workItemKind": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TargetWorkItemKind"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "workspaceBindingId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "targetAgentId",
+        "workspaceBindingId"
+      ],
+      "type": "object"
+    },
+    "PluginDetailsDto": {
+      "additionalProperties": false,
+      "properties": {
+        "authorName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "mcpDisabledReason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "mcpServers": {
+          "items": {
+            "$ref": "#/$defs/InstalledMcpServerDto"
+          },
+          "type": "array"
+        },
+        "name": {
+          "type": "string"
+        },
+        "pluginId": {
+          "type": "string"
+        },
+        "registryId": {
+          "type": "string"
+        },
+        "skills": {
+          "items": {
+            "$ref": "#/$defs/InstalledSkillDto"
+          },
+          "type": "array"
+        },
+        "sourceUrl": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "registryId",
+        "pluginId",
+        "name",
+        "version",
+        "sourceUrl",
+        "skills",
+        "mcpServers"
+      ],
+      "type": "object"
+    },
+    "PluginDetailsParams": {
+      "additionalProperties": false,
+      "properties": {
+        "pluginId": {
+          "type": "string"
+        },
+        "registryId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "registryId",
+        "pluginId"
+      ],
+      "type": "object"
+    },
+    "PluginListDto": {
+      "additionalProperties": false,
+      "properties": {
+        "installed": {
+          "items": {
+            "$ref": "#/$defs/InstalledPluginDto"
+          },
+          "type": "array"
+        },
+        "localMcpServers": {
+          "items": {
+            "$ref": "#/$defs/LocalMcpServerDto"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "installed",
+        "localMcpServers"
+      ],
+      "type": "object"
+    },
+    "PluginNameParams": {
+      "additionalProperties": false,
+      "properties": {
+        "pluginName": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "pluginName"
+      ],
+      "type": "object"
+    },
+    "PluginRegistryDto": {
+      "additionalProperties": false,
+      "properties": {
+        "catalogUrl": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "publicKeyBase64": {
+          "type": "string"
+        },
+        "signatureUrl": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "catalogUrl",
+        "signatureUrl",
+        "publicKeyBase64"
+      ],
+      "type": "object"
+    },
+    "PluginRegistryListDto": {
+      "additionalProperties": false,
+      "properties": {
+        "registries": {
+          "items": {
+            "$ref": "#/$defs/PluginRegistryDto"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "registries"
+      ],
+      "type": "object"
+    },
+    "ProjectCreateResultDto": {
+      "properties": {
+        "project": {
+          "$ref": "#/$defs/ProjectProjection"
+        },
+        "revision": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "project",
+        "revision"
+      ],
+      "type": "object"
+    },
+    "ProjectProjection": {
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "root": {
+          "type": "string"
+        },
+        "trusted": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "root",
+        "trusted"
+      ],
+      "type": "object"
+    },
+    "PromptAgentSessionParams": {
+      "additionalProperties": false,
+      "properties": {
+        "agentSessionId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "agentSessionId",
+        "text"
+      ],
+      "type": "object"
+    },
+    "PublishAgentDraftParams": {
+      "additionalProperties": false,
+      "properties": {
+        "agentDraftId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "bump": {
+          "$ref": "#/$defs/VersionBump",
+          "default": "patch"
+        },
+        "confirmWithoutPassingRun": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "agentDraftId"
+      ],
+      "type": "object"
+    },
+    "PutPluginRegistryParams": {
+      "additionalProperties": false,
+      "properties": {
+        "catalogUrl": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "publicKeyBase64": {
+          "type": "string"
+        },
+        "signatureUrl": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "catalogUrl",
+        "signatureUrl",
+        "publicKeyBase64"
+      ],
+      "type": "object"
+    },
+    "ReadAgentTranscriptParams": {
+      "additionalProperties": false,
+      "properties": {
+        "agentSessionId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "lines": {
+          "default": null,
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "agentSessionId"
+      ],
+      "type": "object"
+    },
+    "ReadFileParams": {
+      "additionalProperties": false,
+      "properties": {
+        "maxBytes": {
+          "default": 262144,
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "type": "object"
+    },
+    "ReadTerminalParams": {
+      "additionalProperties": false,
+      "properties": {
+        "cursor": {
+          "default": 0,
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "maxBytes": {
+          "default": 262144,
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "terminalId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "terminalId"
+      ],
+      "type": "object"
+    },
+    "ReadVersionFileParams": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "versionId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "versionId",
+        "path"
+      ],
+      "type": "object"
+    },
+    "Ready": {
+      "properties": {
+        "runtime_name": {
+          "type": "string"
+        },
+        "runtime_version": {
+          "type": "string"
+        },
+        "version": {
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "version",
+        "runtime_name",
+        "runtime_version"
+      ],
+      "type": "object"
+    },
+    "RegistryCatalogDto": {
+      "additionalProperties": false,
+      "properties": {
+        "generatedAt": {
+          "type": "string"
+        },
+        "plugins": {
+          "items": {
+            "$ref": "#/$defs/RegistryCatalogPluginDto"
+          },
+          "type": "array"
+        },
+        "registryId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "registryId",
+        "generatedAt",
+        "plugins"
+      ],
+      "type": "object"
+    },
+    "RegistryCatalogPluginDto": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "sourceUrl": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "version",
+        "sourceUrl"
+      ],
+      "type": "object"
+    },
+    "RegistryIdParams": {
+      "additionalProperties": false,
+      "properties": {
+        "registryId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "registryId"
+      ],
+      "type": "object"
+    },
+    "ReplaceSecretParams": {
+      "additionalProperties": false,
+      "properties": {
+        "secretRef": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "secretRef",
+        "value"
+      ],
+      "type": "object"
+    },
+    "Request": {
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "method": {
+          "type": "string"
+        },
+        "params": {
+          "default": null
+        },
+        "version": {
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "version",
+        "id",
+        "method"
+      ],
+      "type": "object"
+    },
+    "ResizeTerminalParams": {
+      "additionalProperties": false,
+      "properties": {
+        "cols": {
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "rows": {
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "terminalId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "terminalId",
+        "cols",
+        "rows"
+      ],
+      "type": "object"
+    },
+    "ResizeWorkspacePanesParams": {
+      "additionalProperties": false,
+      "properties": {
+        "layout": {
+          "items": {
+            "$ref": "#/$defs/WorkspacePaneLayoutItem"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "layout"
+      ],
+      "type": "object"
+    },
+    "ResolvedLlmProviderDto": {
+      "additionalProperties": false,
+      "properties": {
+        "allowedModels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "credentialRef": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "defaultModel": {
+          "type": "string"
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "providerId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "providerName": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/LlmProviderType"
+        }
+      },
+      "required": [
+        "providerId",
+        "providerName",
+        "type",
+        "endpoint",
+        "allowedModels",
+        "defaultModel"
+      ],
+      "type": "object"
+    },
+    "Response": {
+      "anyOf": [
+        {
+          "properties": {
+            "result": true
+          },
+          "required": [
+            "result"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "error": {
+              "$ref": "#/$defs/ErrorBody"
+            }
+          },
+          "required": [
+            "error"
+          ],
+          "type": "object"
+        }
+      ],
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "version": {
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "version",
+        "id"
+      ],
+      "type": "object"
+    },
+    "RunIdParams": {
+      "additionalProperties": false,
+      "properties": {
+        "runId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "runId"
+      ],
+      "type": "object"
+    },
+    "RunResultDto": {
+      "properties": {
+        "revision": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "run": {
+          "$ref": "#/$defs/FactoryRun"
+        }
+      },
+      "required": [
+        "run",
+        "revision"
+      ],
+      "type": "object"
+    },
+    "RunSessionResultDto": {
+      "properties": {
+        "revision": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "run": {
+          "$ref": "#/$defs/FactoryRun"
+        },
+        "session": {
+          "$ref": "#/$defs/AgentSessionProjection"
+        }
+      },
+      "required": [
+        "run",
+        "session",
+        "revision"
+      ],
+      "type": "object"
+    },
+    "RuntimeHelloDto": {
+      "properties": {
+        "protocolVersion": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "runtimeName": {
+          "type": "string"
+        },
+        "runtimeVersion": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocolVersion",
+        "runtimeName",
+        "runtimeVersion"
+      ],
+      "type": "object"
+    },
+    "RuntimeMethod": {
+      "enum": [
+        "runtime.hello",
+        "snapshot.get",
+        "harness.list",
+        "project.create",
+        "project.trust.set",
+        "targetAgent.create",
+        "targetAgent.remove",
+        "agentDraft.create",
+        "agentDraft.update",
+        "agentDraft.environment.set",
+        "agentDraft.publish",
+        "agentDraft.discard",
+        "agentSession.create",
+        "agentSession.prompt",
+        "agentSession.interrupt",
+        "agentSession.sendKeys",
+        "agentSession.transcript",
+        "agentSession.screen",
+        "agentSession.input",
+        "agentSession.focus",
+        "agentSession.stop",
+        "factoryRun.create",
+        "factoryRun.cancel",
+        "agentDraft.openWorkspace",
+        "workspacePane.openPrimary",
+        "workspacePane.openToSide",
+        "workspacePane.focus",
+        "workspacePane.close",
+        "workspacePane.resize",
+        "workspacePane.move",
+        "workspacePane.setDock",
+        "run.cancel",
+        "workspaceTerminal.create",
+        "workspaceTerminal.write",
+        "workspaceTerminal.resize",
+        "workspaceTerminal.read",
+        "workspaceTerminal.kill",
+        "workspaceTerminal.close",
+        "file.list",
+        "file.read",
+        "file.diff",
+        "version.files.list",
+        "version.file.read",
+        "settings.setTheme",
+        "settings.setNotifications",
+        "settings.setLayout",
+        "environment.create",
+        "environment.configuration.set",
+        "environment.delete",
+        "llmProvider.create",
+        "llmProvider.configuration.set",
+        "llmProvider.delete",
+        "llmProvider.models.list",
+        "secret.list",
+        "secret.create",
+        "secret.replace",
+        "secret.delete",
+        "registry.list",
+        "registry.put",
+        "registry.delete",
+        "registry.refresh",
+        "plugin.list",
+        "plugin.details",
+        "plugin.install",
+        "plugin.uninstall",
+        "plugin.rollback",
+        "plugin.trustLocalMcp",
+        "plugin.revokeLocalMcp",
+        "update.status",
+        "update.check",
+        "update.confirmAndInstall",
+        "update.rollback"
+      ],
+      "type": "string"
+    },
+    "SecretEnvironmentReferenceDto": {
+      "additionalProperties": false,
+      "properties": {
+        "environmentId": {
+          "type": "string"
+        },
+        "environmentName": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/SecretEnvironmentReferenceKind"
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "environmentId",
+        "environmentName",
+        "kind",
+        "label"
+      ],
+      "type": "object"
+    },
+    "SecretEnvironmentReferenceKind": {
+      "enum": [
+        "llm_provider",
+        "harness_environment_variable"
+      ],
+      "type": "string"
+    },
+    "SecretListDto": {
+      "additionalProperties": false,
+      "properties": {
+        "secrets": {
+          "items": {
+            "$ref": "#/$defs/SecretMetadataDto"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "secrets"
+      ],
+      "type": "object"
+    },
+    "SecretMetadataDto": {
+      "additionalProperties": false,
+      "properties": {
+        "createdAtUnixMs": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "kind": {
+          "$ref": "#/$defs/CredentialKindDto"
+        },
+        "label": {
+          "type": "string"
+        },
+        "referencedBy": {
+          "items": {
+            "$ref": "#/$defs/SecretEnvironmentReferenceDto"
+          },
+          "type": "array"
+        },
+        "secretRef": {
+          "type": "string"
+        },
+        "updatedAtUnixMs": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "secretRef",
+        "label",
+        "kind",
+        "referencedBy",
+        "createdAtUnixMs",
+        "updatedAtUnixMs"
+      ],
+      "type": "object"
+    },
+    "SendAgentKeysParams": {
+      "additionalProperties": false,
+      "description": "Logical keys forwarded to an agent's own interactive surface, such as `esc`\nor `ctrl+c`. Approval prompts belong to the agent, so this is how a blocked\nagent is answered.",
+      "properties": {
+        "agentSessionId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "keys": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "agentSessionId",
+        "keys"
+      ],
+      "type": "object"
+    },
+    "SessionAvailability": {
+      "enum": [
+        "live",
+        "reconnecting",
+        "last_observed",
+        "historical"
+      ],
+      "type": "string"
+    },
+    "SetEnvironmentConfigurationParams": {
+      "additionalProperties": false,
+      "properties": {
+        "configuration": {
+          "$ref": "#/$defs/EnvironmentConfigurationDraft"
+        },
+        "environmentId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "environmentId",
+        "configuration"
+      ],
+      "type": "object"
+    },
+    "SetLayoutParams": {
+      "additionalProperties": false,
+      "properties": {
+        "inspectorPercent": {
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "terminalPercent": {
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "inspectorPercent",
+        "terminalPercent"
+      ],
+      "type": "object"
+    },
+    "SetLlmProviderConfigurationParams": {
+      "additionalProperties": false,
+      "properties": {
+        "configuration": {
+          "$ref": "#/$defs/LlmProviderConfigurationDto"
+        },
+        "providerId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "providerId",
+        "configuration"
+      ],
+      "type": "object"
+    },
+    "SetNotificationsParams": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "enabled"
+      ],
+      "type": "object"
+    },
+    "SetProjectTrustParams": {
+      "additionalProperties": false,
+      "properties": {
+        "projectId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "trusted": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "projectId",
+        "trusted"
+      ],
+      "type": "object"
+    },
+    "SetThemeParams": {
+      "additionalProperties": false,
+      "properties": {
+        "theme": {
+          "$ref": "#/$defs/ThemePreference"
+        }
+      },
+      "required": [
+        "theme"
+      ],
+      "type": "object"
+    },
+    "SetWorkspaceDockParams": {
+      "additionalProperties": false,
+      "properties": {
+        "dock": {
+          "$ref": "#/$defs/WorkspaceDock"
+        },
+        "dockPercent": {
+          "default": 32,
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "workContextId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "workContextId",
+        "dock"
+      ],
+      "type": "object"
+    },
+    "SettingsProjection": {
+      "additionalProperties": false,
+      "properties": {
+        "layout": {
+          "$ref": "#/$defs/LayoutProjection"
+        },
+        "nativeNotifications": {
+          "type": "boolean"
+        },
+        "theme": {
+          "$ref": "#/$defs/ThemePreference"
+        }
+      },
+      "required": [
+        "theme",
+        "nativeNotifications",
+        "layout"
+      ],
+      "type": "object"
+    },
+    "SettingsResultDto": {
+      "properties": {
+        "revision": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "settings": {
+          "$ref": "#/$defs/SettingsProjection"
+        }
+      },
+      "required": [
+        "settings",
+        "revision"
+      ],
+      "type": "object"
+    },
+    "Shutdown": {
+      "properties": {
+        "reason": {
+          "type": "string"
+        },
+        "version": {
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "version",
+        "reason"
+      ],
+      "type": "object"
+    },
+    "StructuredDiff": {
+      "properties": {
+        "afterPath": {
+          "type": "string"
+        },
+        "beforePath": {
+          "type": "string"
+        },
+        "hunks": {
+          "items": {
+            "$ref": "#/$defs/DiffHunk"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "beforePath",
+        "afterPath",
+        "hunks"
+      ],
+      "type": "object"
+    },
+    "StructuredTextDiff": {
+      "properties": {
+        "hunks": {
+          "items": {
+            "$ref": "#/$defs/TextDiffHunk"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "hunks"
+      ],
+      "type": "object"
+    },
+    "TargetAgentCreateResultDto": {
+      "properties": {
+        "draft": {
+          "$ref": "#/$defs/AgentDraftProjection"
+        },
+        "revision": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "targetAgent": {
+          "$ref": "#/$defs/TargetAgentProjection"
+        },
+        "workspaceBinding": {
+          "$ref": "#/$defs/WorkspaceBindingProjection"
+        }
+      },
+      "required": [
+        "targetAgent",
+        "draft",
+        "workspaceBinding",
+        "revision"
+      ],
+      "type": "object"
+    },
+    "TargetAgentIdParams": {
+      "additionalProperties": false,
+      "properties": {
+        "targetAgentId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "targetAgentId"
+      ],
+      "type": "object"
+    },
+    "TargetAgentManifest": {
+      "additionalProperties": false,
+      "properties": {
+        "acceptanceCriteria": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "lifecycle": {
+          "$ref": "#/$defs/TargetAgentManifestLifecycle"
+        },
+        "name": {
+          "type": "string"
+        },
+        "objective": {
+          "type": "string"
+        },
+        "schemaVersion": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "targetAgentId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "targetAgentId",
+        "name",
+        "objective",
+        "acceptanceCriteria",
+        "lifecycle"
+      ],
+      "type": "object"
+    },
+    "TargetAgentManifestLifecycle": {
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "baseVersion": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "draftId": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "kind": {
+              "const": "draft",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "draftId"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "version",
+              "type": "string"
+            },
+            "version": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "version"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "TargetAgentProjection": {
+      "additionalProperties": false,
+      "properties": {
+        "archived": {
+          "type": "boolean"
+        },
+        "id": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "lastActivityAtUnixMs": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "repositoryRoot": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "repositoryRoot",
+        "archived",
+        "lastActivityAtUnixMs"
+      ],
+      "type": "object"
+    },
+    "TargetAgentVersionProjection": {
+      "additionalProperties": false,
+      "properties": {
+        "acceptanceCriteria": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "createdAtUnixMs": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "gitCommit": {
+          "type": "string"
+        },
+        "gitTag": {
+          "type": "string"
+        },
+        "id": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "objective": {
+          "type": "string"
+        },
+        "sourceDraftId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "targetAgentId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "targetAgentId",
+        "version",
+        "name",
+        "objective",
+        "acceptanceCriteria",
+        "sourceDraftId",
+        "gitCommit",
+        "gitTag",
+        "createdAtUnixMs"
+      ],
+      "type": "object"
+    },
+    "TargetAgentWorkGroupProjection": {
+      "additionalProperties": false,
+      "properties": {
+        "drafts": {
+          "items": {
+            "$ref": "#/$defs/AgentDraftProjection"
+          },
+          "type": "array"
+        },
+        "targetAgent": {
+          "$ref": "#/$defs/TargetAgentProjection"
+        },
+        "versions": {
+          "items": {
+            "$ref": "#/$defs/TargetAgentVersionProjection"
+          },
+          "type": "array"
+        },
+        "workItems": {
+          "items": {
+            "$ref": "#/$defs/TargetWorkItemProjection"
+          },
+          "type": "array"
+        },
+        "workspaceBindings": {
+          "items": {
+            "$ref": "#/$defs/WorkspaceBindingProjection"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "targetAgent",
+        "drafts",
+        "versions",
+        "workspaceBindings",
+        "workItems"
+      ],
+      "type": "object"
+    },
+    "TargetWorkItemKind": {
+      "enum": [
+        "agent_draft",
+        "orchestration_thread",
+        "coding_thread",
+        "evaluation_thread",
+        "factory_run"
+      ],
+      "type": "string"
+    },
+    "TargetWorkItemProjection": {
+      "additionalProperties": false,
+      "properties": {
+        "agentDraftId": {
+          "format": "uuid",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/TargetWorkItemKind"
+        },
+        "lastActivityAtUnixMs": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "projectId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "projectLabel": {
+          "type": "string"
+        },
+        "sourceRefLabel": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "type": "string"
+        },
+        "targetAgentId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "workspaceBindingId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "workspaceLabel": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "targetAgentId",
+        "workspaceBindingId",
+        "projectId",
+        "title",
+        "status",
+        "lastActivityAtUnixMs",
+        "projectLabel",
+        "workspaceLabel"
+      ],
+      "type": "object"
+    },
+    "TargetWorkspaceProjection": {
+      "additionalProperties": false,
+      "properties": {
+        "focusedPaneId": {
+          "format": "uuid",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "panes": {
+          "items": {
+            "$ref": "#/$defs/WorkspacePaneProjection"
+          },
+          "type": "array"
+        },
+        "targetGroups": {
+          "items": {
+            "$ref": "#/$defs/TargetAgentWorkGroupProjection"
+          },
+          "type": "array"
+        },
+        "terminals": {
+          "items": {
+            "$ref": "#/$defs/WorkspaceTerminalProjection"
+          },
+          "type": "array"
+        },
+        "workContexts": {
+          "items": {
+            "$ref": "#/$defs/WorkContextProjection"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "targetGroups",
+        "workContexts",
+        "panes",
+        "terminals"
+      ],
+      "type": "object"
+    },
+    "TerminalCreated": {
+      "properties": {
+        "cols": {
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "processId": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "rows": {
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "terminalId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "terminalId",
+        "cols",
+        "rows"
+      ],
+      "type": "object"
+    },
+    "TerminalExit": {
+      "properties": {
+        "code": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "signal": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "code"
+      ],
+      "type": "object"
+    },
+    "TerminalIdParams": {
+      "additionalProperties": false,
+      "properties": {
+        "terminalId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "terminalId"
+      ],
+      "type": "object"
+    },
+    "TerminalKillResultDto": {
+      "properties": {
+        "exitStatus": {
+          "$ref": "#/$defs/TerminalExit"
+        },
+        "terminalId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "terminalId",
+        "exitStatus"
+      ],
+      "type": "object"
+    },
+    "TerminalRead": {
+      "properties": {
+        "dataBase64": {
+          "type": "string"
+        },
+        "exitStatus": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TerminalExit"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "nextCursor": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "readerClosed": {
+          "type": "boolean"
+        },
+        "startCursor": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "terminalId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "truncated": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "terminalId",
+        "dataBase64",
+        "startCursor",
+        "nextCursor",
+        "truncated",
+        "readerClosed"
+      ],
+      "type": "object"
+    },
+    "TerminalResizeResultDto": {
+      "properties": {
+        "cols": {
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "rows": {
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "terminalId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "terminalId",
+        "cols",
+        "rows"
+      ],
+      "type": "object"
+    },
+    "TerminalWriteResultDto": {
+      "properties": {
+        "terminalId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "terminalId"
+      ],
+      "type": "object"
+    },
+    "TestEvidence": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/TestEvidenceStatus"
+        },
+        "summary": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "status",
+        "summary"
+      ],
+      "type": "object"
+    },
+    "TestEvidenceStatus": {
+      "enum": [
+        "passed",
+        "failed",
+        "not_run"
+      ],
+      "type": "string"
+    },
+    "TextDiffHunk": {
+      "properties": {
+        "lines": {
+          "items": {
+            "$ref": "#/$defs/TextDiffLine"
+          },
+          "type": "array"
+        },
+        "newLines": {
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "newStart": {
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "oldLines": {
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "oldStart": {
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "oldStart",
+        "oldLines",
+        "newStart",
+        "newLines",
+        "lines"
+      ],
+      "type": "object"
+    },
+    "TextDiffLine": {
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/TextDiffLineKind"
+        },
+        "newLine": {
+          "format": "uint",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "oldLine": {
+          "format": "uint",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "text"
+      ],
+      "type": "object"
+    },
+    "TextDiffLineKind": {
+      "enum": [
+        "context",
+        "delete",
+        "insert"
+      ],
+      "type": "string"
+    },
+    "ThemePreference": {
+      "enum": [
+        "system",
+        "light",
+        "dark"
+      ],
+      "type": "string"
+    },
+    "UpdateAgentDraftParams": {
+      "additionalProperties": false,
+      "properties": {
+        "acceptanceCriteria": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "agentDraftId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "objective": {
+          "type": "string"
+        },
+        "trusted": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "agentDraftId",
+        "name",
+        "objective",
+        "acceptanceCriteria",
+        "trusted"
+      ],
+      "type": "object"
+    },
+    "UpdateStatusDto": {
+      "additionalProperties": false,
+      "properties": {
+        "configStatus": {
+          "type": "string"
+        },
+        "currentVersion": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "message": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "state": {
+          "type": "string"
+        },
+        "targetVersion": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "enabled",
+        "configStatus",
+        "currentVersion",
+        "state"
+      ],
+      "type": "object"
+    },
+    "Verdict": {
+      "enum": [
+        "pass",
+        "fail",
+        "needs_review"
+      ],
+      "type": "string"
+    },
+    "VersionBump": {
+      "enum": [
+        "patch",
+        "minor",
+        "major"
+      ],
+      "type": "string"
+    },
+    "VersionFileEntryDto": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/VersionFileEntryKindDto"
+        },
+        "path": {
+          "type": "string"
+        },
+        "size": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "path",
+        "kind"
+      ],
+      "type": "object"
+    },
+    "VersionFileEntryKindDto": {
+      "enum": [
+        "file",
+        "symlink",
+        "submodule"
+      ],
+      "type": "string"
+    },
+    "VersionFileReadDto": {
+      "additionalProperties": false,
+      "properties": {
+        "content": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gitCommit": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/VersionFileReadKindDto"
+        },
+        "path": {
+          "type": "string"
+        },
+        "size": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "versionId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "versionId",
+        "gitCommit",
+        "path",
+        "kind"
+      ],
+      "type": "object"
+    },
+    "VersionFileReadKindDto": {
+      "enum": [
+        "text",
+        "binary",
+        "too_large",
+        "unsupported"
+      ],
+      "type": "string"
+    },
+    "VersionFilesListDto": {
+      "additionalProperties": false,
+      "properties": {
+        "entries": {
+          "items": {
+            "$ref": "#/$defs/VersionFileEntryDto"
+          },
+          "type": "array"
+        },
+        "gitCommit": {
+          "type": "string"
+        },
+        "versionId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "versionId",
+        "gitCommit",
+        "entries"
+      ],
+      "type": "object"
+    },
+    "WorkContextProjection": {
+      "additionalProperties": false,
+      "properties": {
+        "agentDraftId": {
+          "format": "uuid",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "dock": {
+          "$ref": "#/$defs/WorkspaceDock"
+        },
+        "dockPercent": {
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "id": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "lastViewedAtUnixMs": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "targetAgentId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "workItemId": {
+          "format": "uuid",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "workItemKind": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TargetWorkItemKind"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "workspaceBindingId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "targetAgentId",
+        "workspaceBindingId",
+        "dock",
+        "dockPercent",
+        "lastViewedAtUnixMs"
+      ],
+      "type": "object"
+    },
+    "WorkspaceBindingProjection": {
+      "additionalProperties": false,
+      "properties": {
+        "additionalRoots": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "archived": {
+          "type": "boolean"
+        },
+        "id": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "lastUsedAtUnixMs": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "primaryRoot": {
+          "type": "string"
+        },
+        "projectId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "sourceRefLabel": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "targetAgentId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "targetAgentId",
+        "projectId",
+        "name",
+        "primaryRoot",
+        "additionalRoots",
+        "archived",
+        "lastUsedAtUnixMs"
+      ],
+      "type": "object"
+    },
+    "WorkspaceDock": {
+      "enum": [
+        "closed",
+        "terminal"
+      ],
+      "type": "string"
+    },
+    "WorkspaceMutationResultDto": {
+      "properties": {
+        "revision": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "revision"
+      ],
+      "type": "object"
+    },
+    "WorkspacePaneIdParams": {
+      "additionalProperties": false,
+      "properties": {
+        "workspacePaneId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "workspacePaneId"
+      ],
+      "type": "object"
+    },
+    "WorkspacePaneLayoutItem": {
+      "additionalProperties": false,
+      "properties": {
+        "widthBasisPoints": {
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "workspacePaneId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "workspacePaneId",
+        "widthBasisPoints"
+      ],
+      "type": "object"
+    },
+    "WorkspacePaneProjection": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "position": {
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "widthBasisPoints": {
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "workContextId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "workContextId",
+        "position",
+        "widthBasisPoints"
+      ],
+      "type": "object"
+    },
+    "WorkspaceTerminalProjection": {
+      "additionalProperties": false,
+      "properties": {
+        "createdAtUnixMs": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "id": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/WorkspaceTerminalState"
+        },
+        "title": {
+          "type": "string"
+        },
+        "workContextId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "workspaceBindingId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "workContextId",
+        "workspaceBindingId",
+        "title",
+        "state",
+        "createdAtUnixMs"
+      ],
+      "type": "object"
+    },
+    "WorkspaceTerminalState": {
+      "enum": [
+        "running",
+        "exited"
+      ],
+      "type": "string"
+    },
+    "WriteAgentSessionParams": {
+      "additionalProperties": false,
+      "properties": {
+        "agentSessionId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "cols": {
+          "default": null,
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "keys": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "rows": {
+          "default": null,
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "text": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "agentSessionId"
+      ],
+      "type": "object"
+    },
+    "WriteTerminalParams": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "type": "string"
+        },
+        "terminalId": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "terminalId",
+        "data"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://agent-factory.local/schemas/runtime-ipc-v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Agent Factory Runtime IPC v1",
+  "type": "object"
+}

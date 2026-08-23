@@ -1,0 +1,25 @@
+{
+  "name": "@agent-factory/runtime-client",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./testing": "./src/testing.ts"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "react": "^19.2.0",
+    "typescript": "6.0.3",
+    "vitest": "^4.1.10"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  }
+}

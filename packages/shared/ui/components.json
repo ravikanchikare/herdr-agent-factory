@@ -1,0 +1,21 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "base-mira",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "../theme/src/tokens.css",
+    "baseColor": "neutral",
+    "cssVariables": true
+  },
+  "iconLibrary": "lucide",
+  "aliases": {
+    "components": "@agent-factory/ui/components",
+    "utils": "@agent-factory/ui/lib/utils",
+    "ui": "@agent-factory/ui/components",
+    "lib": "@agent-factory/ui/lib",
+    "hooks": "@agent-factory/ui/hooks"
+  },
+  "registries": {}
+}

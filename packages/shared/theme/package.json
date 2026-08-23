@@ -1,0 +1,12 @@
+{
+  "name": "@agent-factory/theme",
+  "version": "0.0.0",
+  "private": true,
+  "sideEffects": [
+    "*.css",
+    "**/*.css"
+  ],
+  "exports": {
+    "./tokens.css": "./src/tokens.css"
+  }
+}

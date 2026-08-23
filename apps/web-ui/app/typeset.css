@@ -1,0 +1,64 @@
+@layer components {
+  .typeset {
+    --typeset-font-body: inherit;
+    --typeset-font-heading: inherit;
+    --typeset-font-mono: var(--font-mono);
+    --typeset-size: 1em;
+    --typeset-leading: 1.6;
+    --typeset-flow: 1em;
+
+    color: var(--foreground);
+    font-family: var(--typeset-font-body);
+    font-size: var(--typeset-size);
+    line-height: var(--typeset-leading);
+  }
+
+  .typeset :where(h1, h2, h3, h4) {
+    color: var(--foreground);
+    font-family: var(--typeset-font-heading);
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .typeset > :where(*) + :where(*) {
+    margin-block-start: var(--typeset-flow);
+  }
+
+  .typeset :where(ul, ol) {
+    padding-inline-start: 1.5em;
+  }
+
+  .typeset :where(ul) {
+    list-style-type: disc;
+  }
+
+  .typeset :where(ol) {
+    list-style-type: decimal;
+  }
+
+  .typeset :where(code, pre) {
+    font-family: var(--typeset-font-mono);
+  }
+
+  .typeset :where(strong) {
+    font-weight: 600;
+  }
+
+  .typeset :where(code) {
+    border-radius: var(--radius-sm);
+    background: var(--background);
+    padding-inline: 0.25em;
+  }
+
+  .typeset :where(blockquote) {
+    border-inline-start: 2px solid var(--border);
+    color: var(--muted-foreground);
+    padding-inline-start: 1em;
+  }
+
+  .typeset-results {
+    --typeset-size: 0.75rem;
+    --typeset-leading: 1.6;
+    --typeset-flow: 0.75rem;
+  }
+}

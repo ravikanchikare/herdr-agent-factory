@@ -1,0 +1,59 @@
+@import "@agent-factory/theme/tokens.css";
+@import "./typeset.css";
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+@theme inline {
+  --animate-shimmer: shimmer 2s linear infinite;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 100% center;
+  }
+
+  to {
+    background-position: -100% center;
+  }
+}
+
+/* While dragging the sidebar boundary, suppress the width/left transitions so
+   the panel tracks the pointer without smoothing lag. */
+body.sidebar-resizing [data-slot="sidebar-gap"],
+body.sidebar-resizing [data-slot="sidebar-container"] {
+  transition: none;
+}
+
+/* Shared primitives own their icon states. Raw web-ui controls follow the same
+   muted-default and foreground-interaction contract here. */
+button:not([data-slot="button"]) svg:not([class*="text-"]) {
+  color: var(--muted-foreground);
+  transition-duration: var(--default-transition-duration);
+  transition-property: color;
+  transition-timing-function: var(--default-transition-timing-function);
+}
+
+button:not([data-slot="button"]):is(
+  :hover,
+  :focus-visible,
+  :active,
+  [aria-expanded="true"],
+  [aria-pressed="true"],
+  [aria-selected="true"],
+  [data-state="open"]
+) svg:not([class*="text-"]) {
+  color: var(--foreground);
+}
+
+[data-native-drag-region] {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+[data-native-drag-region] > svg:not([class*="text-"]) {
+  color: var(--muted-foreground);
+}
