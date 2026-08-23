@@ -1,0 +1,14 @@
+{
+  "id": "add-workspace-binding-validation",
+  "prompt": "Read CLAUDE.md and intent/_template/intent.md. Produce a minimal validation for Workspace Binding creation that rejects an empty binding name and ensures a Herdr Workspace lookup is revalidated (not cached). Do not edit generated bindings in packages/shared/runtime-client.",
+  "checks": {
+    "tests_pass": "pnpm test:web && cargo test --workspace",
+    "lint_clean": "pnpm validate",
+    "no_generated_edits": "git diff --name-only | grep -qv 'packages/shared/runtime-client'",
+    "policy_followed": "skills agent-factory-architecture and rust-ledger applied"
+  },
+  "expect": {
+    "files_changed": ["crates/app-core/**", "services/runtime/**"],
+    "must_not_change": ["packages/shared/runtime-client/**", "target/**"]
+  }
+}

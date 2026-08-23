@@ -1,0 +1,53 @@
+name: Agent evals
+on:
+  pull_request:
+    paths:
+      - "CLAUDE.md"
+      - ".claude/**"
+      - "evals/**"
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+jobs:
+  evals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.11.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+      - name: Validate contracts and lint
+        run: pnpm validate
+      - name: Run eval suite
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set -euo pipefail
+          failures=0
+          for eval in evals/*.json; do
+            [ -e "$eval" ] || continue
+            echo "::group::eval $eval"
+            claude -p "$(jq -r '.prompt' "$eval")" \
+              --allowedTools "Read,Edit,Bash" \
+              --output-format json > result.json || true
+            if ! ./evals/check.sh "$eval" result.json; then
+              failures=$((failures+1))
+            fi
+            echo "::endgroup::"
+          done
+          if [ "$failures" -gt 0 ]; then
+            echo "$failures eval(s) failed" >&2
+            exit 1
+          fi
+      - name: Rust tests
+        run: cargo test --workspace

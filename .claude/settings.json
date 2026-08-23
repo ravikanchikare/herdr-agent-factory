@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json.schemas.claude.com/settings.json",
+  "permissions": {
+    "deny": [
+      "Read(.env*)",
+      "Read(./secrets/**)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "WebFetch(domain:*)",
+      "Bash(curl *)",
+      "Bash(wget *)"
+    ],
+    "allow": [
+      "Read(intent/**)",
+      "Read(docs/**)",
+      "Read(CLAUDE.md)",
+      "Read(AGENTS.md)",
+      "Read(REVIEW.md)",
+      "Bash(git *)",
+      "Bash(but *)",
+      "Bash(pnpm *)",
+      "Bash(cargo *)",
+      "Bash(make *)",
+      "Bash(npm *)"
+    ],
+    "disableBypassPermissionsMode": "disable"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/block-generated.sh"
+          },
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/block-secrets.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/production-gate.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/format-after-edit.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

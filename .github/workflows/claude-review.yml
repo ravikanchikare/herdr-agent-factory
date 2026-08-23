@@ -1,0 +1,25 @@
+name: Claude Review
+# Stage 5 · Deploy — AI in the PR review loop (optional; enable when managed Code Review or Bedrock/Vertex key is available)
+# Requires: ANTHROPIC_API_KEY or AWS Bedrock / Vertex / Foundry credentials. See playbook "AI in the PR review loop".
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    if: vars.CLAUDE_REVIEW_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Claude Code Review
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Review policy is REVIEW.md at repo root; skills in .claude/skills/* are auto-loaded
+          prompt: |
+            Review this PR per REVIEW.md. Run three passes (Bugs, Security, Compliance), tag each finding with its pass and severity (Important vs Nit, max 5 nits). Check the diff against intent/<slug>/plan.md and spec.md when present. Do not approve or block — findings are advisory; human code owner approves via branch protection.
