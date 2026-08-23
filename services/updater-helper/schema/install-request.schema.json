@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentfactory.app/schemas/updater-helper-install-v1.json",
+  "title": "Agent Factory Updater Helper Install Request v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "currentBundle",
+    "stagedBundle",
+    "expectedBundleId"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "currentBundle": { "type": "string", "pattern": "^/.*\\.app$" },
+    "stagedBundle": { "type": "string", "pattern": "^/.*\\.app$" },
+    "expectedBundleId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9.-]{1,200}$"
+    }
+  }
+}
+

@@ -1,0 +1,5 @@
+[ui]
+# Herdr measures this in terminal columns. Six extra columns are approximately
+# 50 px with the native terminal's default font metrics.
+sidebar_width = 32
+sidebar_max_width = 42

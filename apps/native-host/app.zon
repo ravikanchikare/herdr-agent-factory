@@ -1,0 +1,58 @@
+.{
+    .id = "app.agentfactory.desktop",
+    .name = "agent-factory",
+    .display_name = "Agent Factory",
+    .description = "A native desktop workbench for building and evaluating agents.",
+    .version = "0.1.0",
+    .icons = .{"assets/icon.png"},
+    .platforms = .{"macos"},
+    .permissions = .{ "dialog", "notifications", "window", "view", "command" },
+    // "tray" declares the persistent menu-bar status item. The main
+    // window uses close_policy = "hide", so closing it hides the window
+    // while the process keeps running behind the status item; only the
+    // explicit Quit command (app menu or tray) terminates the app.
+    .capabilities = .{ "native_views", "gpu_surfaces", "webview", "tray" },
+    .frontend = .{
+        // Native packaging maps apps/web-ui/out to this bundle-relative root.
+        .dist = "frontend/out",
+        .entry = "index.html",
+        .spa_fallback = true,
+        .dev = .{
+            .url = "http://127.0.0.1:3000/",
+            .command = .{ "pnpm", "--dir", "../..", "dev:web" },
+            .ready_path = "/",
+            .timeout_ms = 60000,
+        },
+    },
+    .security = .{
+        .navigation = .{
+            .allowed_origins = .{ "zero://app", "http://127.0.0.1:3000" },
+            .external_links = .{
+                .action = "open_system_browser",
+                .allowed_urls = .{
+                    "https://github.com/ravikanchikare/desktop-shell-plugins/*",
+                },
+            },
+        },
+    },
+    .web_engine = "system",
+    .shell = .{
+        .windows = .{
+            .{
+                .label = "main",
+                .title = "Agent Factory",
+                .width = 1440,
+                .height = 960,
+                .min_width = 960,
+                .min_height = 640,
+                .restore_state = true,
+                .titlebar = "hidden_inset",
+                .close_policy = "hide",
+                .views = .{
+                    .{ .label = "agent-factory-canvas", .kind = "gpu_surface", .fill = true, .role = "Agent Factory shell", .accessibility_label = "Agent Factory", .gpu_backend = "metal", .gpu_pixel_format = "bgra8_unorm", .gpu_present_mode = "timer", .gpu_alpha_mode = "opaque", .gpu_color_space = "srgb", .gpu_vsync = true },
+                    .{ .label = "agent-factory-web", .kind = "webview", .parent = "agent-factory-canvas", .url = "zero://app/index.html", .x = 0, .y = 0, .width = 1, .height = 1, .layer = 20 },
+                },
+            },
+        },
+    },
+}

@@ -1,0 +1,16 @@
+<!-- The web application starts full-width. A Run's single Open action
+     reveals one native Herdr TUI on the right; Herdr owns every workspace,
+     pane, agent, process, and layout rendered inside that terminal. -->
+<column grow="1" background="background">
+  <if test="{terminal_visible}">
+    <split grow="1" value="{split_fraction}" on-resize="split_resized">
+      <column min-width="280" grow="1" label="web-pane"></column>
+      <column min-width="480" grow="1">
+        <terminal pty="{terminal_key}" scrollback="{terminal_scrollback}" on-terminal="terminal_state" autofocus="true" grow="1" label="{terminal_label}" />
+      </column>
+    </split>
+  </if>
+  <else>
+    <column grow="1" label="web-pane"></column>
+  </else>
+</column>
