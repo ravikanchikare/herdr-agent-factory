@@ -1,0 +1,14 @@
+[package]
+name = "agent-factory-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "agent-factory"
+path = "src/main.rs"
+
+[dependencies]
+agent-control = { path = "../../crates/agent-control" }
+serde_json.workspace = true

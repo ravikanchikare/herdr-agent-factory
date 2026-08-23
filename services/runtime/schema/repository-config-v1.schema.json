@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-factory.local/schemas/repository-config-v1.schema.json",
+  "title": "Agent Factory Repository Configuration v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "worktreesDirectory"],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "worktreesDirectory": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    }
+  }
+}

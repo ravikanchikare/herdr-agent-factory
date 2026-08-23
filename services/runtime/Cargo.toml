@@ -1,0 +1,34 @@
+[package]
+name = "agent-factory-runtime"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+agent-control = { path = "../../crates/agent-control" }
+app-core = { path = "../../crates/app-core" }
+base64.workspace = true
+directories.workspace = true
+filesystem-runtime = { path = "../../crates/filesystem-runtime" }
+hex.workspace = true
+herdr-client = { path = "../../crates/herdr-client" }
+git-runtime = { path = "../../crates/git-runtime" }
+ipc-contract = { path = "../../crates/ipc-contract" }
+llm-gateway = { path = "../../crates/llm-gateway" }
+llm-provider-runtime = { path = "../../crates/llm-provider-runtime" }
+project-store = { path = "../../crates/project-store" }
+platform-secrets = { path = "../../crates/platform-secrets" }
+plugin-runtime = { path = "../../crates/plugin-runtime" }
+runtime-contract = { path = "../../crates/runtime-contract" }
+serde.workspace = true
+serde_json.workspace = true
+semver.workspace = true
+sha2.workspace = true
+terminal-runtime = { path = "../../crates/terminal-runtime" }
+tempfile.workspace = true
+thiserror.workspace = true
+update-runtime = { path = "../../crates/update-runtime" }
+uuid.workspace = true
+url.workspace = true
+environment-runtime = { path = "../../crates/environment-runtime" }
