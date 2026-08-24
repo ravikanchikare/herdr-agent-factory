@@ -1,7 +1,7 @@
 name: Claude Review
-# Optional PR review against REVIEW.md. Enable with repository variable
-# CLAUDE_REVIEW_ENABLED=true. Requires ANTHROPIC_API_KEY or an equivalent
-# Bedrock / Vertex / Foundry credential.
+# Optional PR review against AGENTS.md and intent/<slug> artifacts.
+# Enable with repository variable CLAUDE_REVIEW_ENABLED=true. Requires
+# ANTHROPIC_API_KEY or an equivalent Bedrock / Vertex / Foundry credential.
 on:
   pull_request:
     types: [opened, synchronize, reopened]
@@ -21,6 +21,6 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          # Review policy is REVIEW.md at repo root; skills in .claude/skills/* are auto-loaded
+          # Skills in .claude/skills/* are auto-loaded
           prompt: |
-            Review this PR per REVIEW.md. Run three passes (Bugs, Security, Compliance), tag each finding with its pass and severity (Important vs Nit, max 5 nits). Check the diff against intent/<slug>/plan.md and spec.md when present. Do not approve or block — findings are advisory; human code owner approves via branch protection.
+            Review this PR against AGENTS.md. Run three passes (Bugs, Security, Compliance), tag each finding with its pass and severity (Important vs Nit, max 5 nits). Check the diff against intent/<slug>/plan.md and spec.md when present. Do not approve or block — findings are advisory; human code owner approves via branch protection.

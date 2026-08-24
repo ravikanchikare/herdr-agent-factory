@@ -43,7 +43,7 @@ UI and host:
 
 Policy and proof:
 
-- `AGENTS.md`, `CLAUDE.md`, `REVIEW.md`, `docs/spec/`
+- `AGENTS.md`, `CLAUDE.md`, `docs/spec/`
 - `.claude/skills/{agent-factory-architecture,herdr-authority,rust-ledger}/`
 - `.claude/hooks/`, `evals/`
 - Tests colocated with the behavior they cover

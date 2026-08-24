@@ -21,7 +21,7 @@ the audit trail.
 | `intent/<slug>/spec.md` | Requirements, design, flagged concerns | Product owner; policy owners on flags |
 | `intent/<slug>/plan.md` | Files, order, risks, proof | Engineer; tech lead if high-risk |
 | Diff + tests | Implementation | Code owner via branch protection |
-| PR findings | Bugs, security, compliance (`REVIEW.md`) | Advisory; humans merge |
+| PR findings | Bugs, security, compliance vs spec/plan | Advisory; humans merge |
 | New `intent.md` | A production miss that must not recur | Product owner |
 
 Templates live in `intent/_template/`. The current product is
@@ -52,9 +52,9 @@ Templates live in `intent/_template/`. The current product is
 
 ## Review and merge
 
-`REVIEW.md` defines three passes (bugs, security, compliance) and
-caps nits. Findings do not approve a PR. Branch protection requires
-a human code owner. The author of a diff cannot approve it.
+PR review checks the diff against `spec.md` and `plan.md`. Findings
+do not approve a PR. Branch protection requires a human code owner.
+The author of a diff cannot approve it.
 
 ## Measuring the loop
 

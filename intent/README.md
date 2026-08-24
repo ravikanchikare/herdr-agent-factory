@@ -44,8 +44,8 @@ changes.
 5. Plan names files, order, risks, and proof. Implementation follows
    the accepted plan. If the diff departs, update `plan.md` in the
    same commit.
-6. PR review checks the diff against `spec.md` and `plan.md`
-   (`REVIEW.md`). CI is `pnpm validate` and `pnpm test`.
+6. PR review checks the diff against `spec.md` and `plan.md`.
+   CI is `pnpm validate` and `pnpm test`.
 7. A breached production control becomes a new `intent.md`.
 
 Humans accept at each gate. Agents draft artifacts and diffs; they
