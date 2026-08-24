@@ -8,7 +8,7 @@ Run three passes and tag each finding with its pass:
 
 - **Bugs** — logic errors, broken edge cases, subtle regressions, authority boundary violations (e.g. copying Herdr/Git live state into Rust ledger, React owning domain state machine).
 - **Security** — injection, auth gaps, PII/secrets in logs or diffs, filesystem traversal/escaping symlinks, credential leakage (Keychain vs SQLite), loopback gateway bypass, plugin transport violations (HTTPS/size/digest/signature, unsafe redirects).
-- **Compliance** — change matches `intent/<slug>/intent.md` + `spec.md` + `plan.md`; `crates/runtime-contract` is sole authority (no hand-edited `packages/shared/runtime-client`); static UI constraints (no Next.js server/API routes); Conventional Commit + GitButler (`but`) usage; `AGENTS.md`/`CLAUDE.md` invariants.
+- **Compliance** — change matches `intent/<slug>/intent.md` + `spec.md` + `plan.md`; `crates/runtime-contract` is sole authority (no hand-edited `packages/shared/runtime-client`); static UI constraints (no Next.js server/API routes); Conventional Commit usage; `AGENTS.md`/`CLAUDE.md` invariants.
 
 ## Severity
 

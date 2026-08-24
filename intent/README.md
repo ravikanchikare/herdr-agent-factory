@@ -55,5 +55,7 @@ Non-engineers do not need git — a GitHub connector lets Claude commit on their
 SLUG=$(date +%Y-%m-%d)-my-idea
 mkdir -p intent/$SLUG
 cp intent/_template/intent.md intent/$SLUG/intent.md
-# edit, then: but diff && but commit -b intent/$SLUG -m "feat(intent): add $SLUG" <ids>
+# edit, then:
+# git add intent/$SLUG/intent.md
+# git commit -m "feat(intent): add $SLUG"
 ```

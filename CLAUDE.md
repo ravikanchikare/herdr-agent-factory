@@ -24,7 +24,7 @@ Healthy outputs: `cargo test` → `test result: ok`, `pnpm validate` → zero wa
 - TypeScript: strict, 2 spaces, 80 cols, no semicolons, double quotes, ES5 trailing commas. `PascalCase` components, `camelCase` symbols. Discriminated unions over boolean combos.
 - React: shadcn primitives from `packages/shared/ui` only; semantic Tailwind tokens only (no arbitrary colors/spacing); `useSyncExternalStore` for external stores; avoid `useEffect` except for imperative third-party setup with comment.
 - Rust: `cargo fmt` required. No `Debug` of secrets. Raw credentials never in SQLite, logs, IPC, or UI projections — Keychain only.
-- Commits: Conventional Commit `type(scope): summary` via `but` (GitButler). Use `but diff` → `but commit -b <branch> -m "msg" <ids>`. Never `git add/commit/push` directly.
+- Commits: Conventional Commit `type(scope): summary`.
 - Contracts: `crates/runtime-contract` is sole authority for runtime messages/projections. Generate via `pnpm contracts:generate`; never hand-edit `packages/shared/runtime-client`.
 - Static UI only: no Next.js server, API routes, Server Actions, middleware, ISR. Dev origin `http://127.0.0.1:3000`, prod `zero://app`.
 
