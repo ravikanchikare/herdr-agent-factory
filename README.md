@@ -18,6 +18,8 @@ surface. It owns the Workspaces, panes, processes, terminals, and lifecycle of
 the agents doing the work. Agent Factory supplies the product definition,
 control policy, history, and user experience around that runtime.
 
+![Agent Factory Draft overview with Herdr agents and a live workspace terminal](assets/application.png)
+
 ## From a goal to an improved agent
 
 A Target Agent begins with two inputs:
