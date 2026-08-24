@@ -344,12 +344,14 @@ interactive controls.
   ADRs.
 
 Start architecture work with `docs/spec/ownership.md`,
-`docs/spec/herdr.md`, and the accepted ADRs. When prose and executable
-contracts disagree, stop and reconcile the owning contract or ADR instead of
-silently creating a third interpretation. The Herdr-native authority model in
-this file is the current product direction. Revise older ADRs that assign direct
-worktree lifecycle or persisted live runtime authority to Rust; do not preserve
-both models through adapters, aliases, or dual writes.
+`docs/spec/herdr.md`, and the accepted ADRs. The current product record
+is `intent/2026-08-24-herdr-native-control-plane/`. When prose and
+executable contracts disagree, stop and reconcile the owning contract
+or ADR instead of silently creating a third interpretation. The
+Herdr-native authority model in this file is the current product
+direction. Revise older ADRs that assign direct worktree lifecycle or
+persisted live runtime authority to Rust; do not preserve both models
+through adapters, aliases, or dual writes.
 
 ## UI and React Principles
 

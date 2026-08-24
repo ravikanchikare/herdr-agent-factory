@@ -21,9 +21,16 @@
 - `adr-0009-target-centric-work-feed.md` — Target Agent and Draft-first navigation (accepted).
 - `adr-0010-independent-llm-providers-and-environment-boundary.md` — Independent LLM Providers and Environment boundary (accepted).
 - `adr-0011-herdr-workspace-identity-and-terminal-surface.md` — Herdr workspace identity and terminal surface (accepted).
+- `adr-0012-park-opencode-research.md` — Park the OpenCode runtime research (accepted).
+
+The current product record is
+`intent/2026-08-24-herdr-native-control-plane/`. Process docs live in
+`docs/sdlc/README.md`.
 
 ## Research (quarantined)
 
-- `research/opencode-api-port.md` — ⚠️ Research draft — speculative. NOT the current Herdr-native architecture. Current direction is `AGENTS.md` and `docs/spec/ownership.md`; see ADR 0012 for parking decision. Maps Agent Factory onto a pure TypeScript + OpenCode V2 runtime for comparison only.
+- `research/opencode-api-port.md` — Research draft only. Not the
+  current architecture. See ADR 0012. Maps Agent Factory onto a
+  TypeScript + OpenCode V2 runtime for comparison.
 
 > The research draft is quarantined under `research/` and must not be treated as architecture.

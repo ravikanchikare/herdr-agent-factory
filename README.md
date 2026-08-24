@@ -47,13 +47,11 @@ flowchart TD
     environment --> run["Factory Run"]
     run --> orchestrator["Orchestrator<br/>plan, delegate, and judge"]
 
-    orchestrator --> builder["Builder<br/>create or improve the Draft"]
-    builder --> validator["Validator<br/>run checks and collect evidence"]
-    validator --> evaluator["Evaluator<br/>measure against the criteria"]
-    evaluator --> auditor["Auditor<br/>inspect risks, quality, and gaps"]
-    auditor --> gate{"Success criteria met?"}
+    orchestrator --> coding["Coding<br/>create or improve the Draft"]
+    coding --> evaluation["Evaluation<br/>measure against the criteria"]
+    evaluation --> gate{"Success criteria met?"}
 
-    gate -->|No| findings["Findings + evidence<br/>next improvement brief"]
+    gate -->|No| findings["Findings + evidence<br/>next Coding brief"]
     findings --> orchestrator
     gate -->|Human decision needed| intervention["User reviews, intervenes,<br/>or collaborates in Herdr"]
     intervention --> orchestrator
@@ -62,23 +60,17 @@ flowchart TD
 
 The loop is explicit rather than inferred from terminal output:
 
-1. **Build** — a Builder changes the target agent in its Draft worktree.
-2. **Validate** — focused checks establish whether the change works as
-   intended and capture reproducible evidence.
-3. **Evaluate** — an independent agent compares the result with the declared
-   success criteria.
-4. **Audit** — an additional pass looks for quality, safety, security, or
-   compliance gaps that a narrow evaluation may miss.
-5. **Improve or finish** — the Orchestrator turns findings into the next build
-   brief, asks the user for a decision when necessary, or records a passing
-   result.
+1. **Code** — a Coding agent changes the target agent in its Draft
+   worktree.
+2. **Evaluate** — an independent agent compares the result with the
+   declared success criteria.
+3. **Improve or finish** — the Orchestrator turns findings into the
+   next brief, escalates to the user, or records a passing result.
 
-The current executable Run contract has first-class **Orchestrator**,
-**Coding** (Builder), and **Evaluation** sessions. Validator and Auditor are
-specialized managed-agent responsibilities or evaluation passes within the
-same loop, rather than competing durable Run state machines. The project is
-experimental, and these role boundaries will continue to be refined from real
-workflows.
+The executable Run contract has first-class **Orchestrator**,
+**Coding**, and **Evaluation** sessions. Validator and Auditor remain
+responsibilities the Orchestrator may assign to a managed agent; they
+are not competing durable Run state machines.
 
 ## A configurable agent team
 
@@ -89,10 +81,13 @@ Environment capabilities needed for the target:
 | Role | Responsibility |
 | --- | --- |
 | **Orchestrator** | Owns workflow decisions, delegates work, reviews evidence, requests another iteration, escalates, and declares the final outcome. |
-| **Builder** | Implements or revises the Target Agent, its prompts, tools, Skills, tests, and supporting code. |
-| **Evaluator** | Independently measures the current Draft against the stated success criteria and returns structured findings. |
-| **Validator** | Runs focused checks, tests, and scenarios so claims are backed by reproducible evidence. |
-| **Auditor** | Reviews the broader result for risks, regressions, policy concerns, and blind spots before acceptance. |
+| **Coding** | Implements or revises the Target Agent, its prompts, tools, Skills, tests, and supporting code. |
+| **Evaluation** | Independently measures the current Draft against the stated success criteria and returns structured findings. |
+
+The Orchestrator may also assign **Validator** (focused checks and
+reproducible evidence) or **Auditor** (risk, regression, and policy
+gaps) work to a managed agent. Those are responsibilities, not extra
+Run states.
 
 The same harness can fill several roles, or different harnesses, models,
 permissions, Skills, and tools can be selected for different responsibilities.
@@ -100,8 +95,8 @@ Herdr discovers the available harness kinds; Agent Factory does not bundle or
 install agents and does not start or manage the Herdr server.
 
 Only the Orchestrator receives authority to issue semantic Run commands.
-Builder, Evaluator, Validator, and Auditor agents receive the context and
-capabilities they need, but cannot silently advance or finish the Run.
+Coding, Evaluation, and any other managed agents receive the context
+they need, but cannot silently advance or finish the Run.
 
 ## Monitor and collaborate in real time
 
@@ -132,7 +127,7 @@ repeatedly producing and improving **different** agents.
 | --- | --- |
 | The main product is one agent or agent graph. | The main product is a reusable process that can produce many Target Agents. |
 | Success is often that an invocation completed. | Success is declared up front as measurable criteria and must be supported by evidence. |
-| Building, testing, and review happen outside the framework. | Builder, Evaluator, Validator, and Auditor responsibilities participate in one coordinated loop. |
+| Building, testing, and review happen outside the framework. | Coding and Evaluation participate in one coordinated loop the Orchestrator judges. |
 | Runtime state and product history are often treated as one thing. | Live Herdr state, Git facts, and durable Factory records have separate authorities. |
 | Human input is commonly limited to starting a run or reading its output. | Users can monitor, intervene, and collaborate with every live agent through Herdr. |
 | The result is usually an execution. | The result can become a versioned, reproducible Target Agent that the factory can refine again. |
@@ -158,7 +153,7 @@ flowchart LR
     git -->|repository facts| rust
 
     herdr --> orchestrator["Orchestrator pane"]
-    herdr --> workers["Builder / Evaluator /<br/>Validator / Auditor panes"]
+    herdr --> workers["Coding / Evaluation panes"]
     orchestrator -->|workflow decisions| rust
     user -.->|inspect, prompt,<br/>interrupt, answer| herdr
     herdr -.->|live panes and output| user
@@ -180,8 +175,10 @@ the fact.
 
 The detailed model and accepted decisions live in [`docs/spec/`](docs/spec/),
 starting with [architecture ownership](docs/spec/ownership.md) and the
-[Herdr integration](docs/spec/herdr.md). Repository contribution rules are in
-[`AGENTS.md`](AGENTS.md).
+[Herdr integration](docs/spec/herdr.md). The current product record is
+[`intent/2026-08-24-herdr-native-control-plane/`](intent/2026-08-24-herdr-native-control-plane/).
+Repository contribution rules are in [`AGENTS.md`](AGENTS.md). How we
+record work is in [`docs/sdlc/README.md`](docs/sdlc/README.md).
 
 ## Core product concepts
 

@@ -1,4 +1,8 @@
-> ⚠️ Research draft — speculative. NOT the current Herdr-native architecture. Current direction is AGENTS.md and docs/spec/ownership.md. See ADR 0012 for parking decision.
+> Research draft — speculative. Not the current Herdr-native
+> architecture. Current direction is `AGENTS.md`,
+> `docs/spec/ownership.md`, and
+> `intent/2026-08-24-herdr-native-control-plane/`. Parked by
+> ADR 0012.
 
 # OpenCode port mapping: Agent Factory on a pure TypeScript runtime
 

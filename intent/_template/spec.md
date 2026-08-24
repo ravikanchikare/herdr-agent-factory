@@ -1,8 +1,8 @@
 # Spec: <same slug as intent>
 
 Derived from: `intent.md` (YYYY-MM-DD) · Status: draft · Author: <product owner>
-Skills applied: <list skill names + versions at time of writing>
-Prompt: <paste the prompt used to generate this spec>
+Skills applied: <skill names + versions at time of writing>
+Prompt: <prompt used to generate this spec>
 
 ## Requirements
 
@@ -13,8 +13,8 @@ Numbered, testable requirements distilled from the intent.
 
 ## Design
 
-Architecture, UX, API, and data decisions constrained by the listed skills.
-Include mock or Figma link for frontend work (Claude Design export if used).
+Architecture, UX, API, and data decisions constrained by the listed
+skills. Include a mock or screenshot for frontend work.
 
 ### UX
 
@@ -22,7 +22,8 @@ Include mock or Figma link for frontend work (Claude Design export if used).
 
 ### API / Contracts
 
-… (`crates/runtime-contract` is authoritative; no hand-edited bindings)
+… (`crates/runtime-contract` is authoritative; no hand-edited
+bindings)
 
 ### Data / Persistence
 
@@ -30,8 +31,8 @@ Include mock or Figma link for frontend work (Claude Design export if used).
 
 ## Flagged concerns
 
-Areas where policies conflict or cannot be fully satisfied. Each concern names
-its policy owner and resolution status.
+Areas where policies conflict or cannot be fully satisfied. Each
+concern names its policy owner and resolution status.
 
 - [ ] <concern> — owner: <name> — status: open / resolved
 
@@ -45,5 +46,5 @@ Maps 1-to-1 to intent success criteria.
 
 ---
 
-*Accepted spec triggers Stage 3 — Build (plan mode, `plan.md`). Flagged
-concerns must be resolved with policy owners before engineering starts.*
+An accepted spec triggers `plan.md`. Flagged concerns must be
+resolved with policy owners before engineering starts.

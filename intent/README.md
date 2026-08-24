@@ -1,10 +1,13 @@
-# Intent home — AI-native SDLC Stage 1 · Plan
+# Intent home
 
-This directory is the version-controlled home for every `intent.md` (play 01 of the [AI-native SDLC playbook](https://claude.com/blog/the-ai-native-sdlc-playbook)). Each intent is a human-readable, machine-actionable proto-spec that the next stage reads. The commit chain is the audit trail: who asked, what was produced, who approved.
+This directory is the version-controlled home for every change record.
+Each intent is a human-readable, machine-actionable proto-spec. The
+commit chain is the audit trail: who asked, what was produced, who
+approved.
 
-## Source-of-truth rule
-
-For this repository the **repo is the source of truth** for intent. If a legacy tracker (Jira / Linear) is used elsewhere, every intent notes the external record ID and every external record links the intent commit SHA. See “Legacy systems and the source of truth” sidebar in the playbook.
+The **repo is the source of truth**. If a tracker (Jira / Linear) is
+used elsewhere, every intent notes that record id and every tracker
+item links the intent commit SHA.
 
 ## Layout
 
@@ -13,41 +16,60 @@ intent/
   README.md            — this file
   _template/
     intent.md          — copy this to start a new intent
-    spec.md            — template for Stage 2 output
-    plan.md            — template for Stage 3 output
+    spec.md            — requirements and design
+    plan.md            — files, order, risks, proof
   YYYY-MM-DD-<slug>/   — one directory per intent
-    intent.md          — Stage 1 artifact (required)
-    spec.md            — Stage 2 artifact (added after design)
-    plan.md            — Stage 3 artifact (added after planning)
+    intent.md          — required
+    spec.md            — after design is accepted
+    plan.md            — after the implementation plan is accepted
 ```
 
-Example: `intent/2026-08-23-workspace-terminals/intent.md`.
+Keep at most one intent directory per change. A merged change for that
+intent closes the loop. A production failure writes the next intent.
 
-Keep at most one intent directory per change. A merged PR for that intent closes the loop; a breached control in production writes the next intent.
+The current product is recorded in
+`intent/2026-08-24-herdr-native-control-plane/`. New work starts a new
+slug; it does not rewrite that record unless the product itself
+changes.
 
 ## Lifecycle
 
-1. Originator brainstorms with Claude (claude.ai / Cowork / Claude Code) in their own words — no formal language required. Claude asks analyst questions (scope, users, constraints, success criteria).
-2. Claude writes `intent/_template/intent.md` → `intent/<slug>/intent.md` using the template.
-3. Originator corrects misunderstandings; product owner reviews.
-4. Commit `intent.md`. Author + timestamp are in git history.
-5. Product owner accepts or rejects via PR merge / close review — that decision triggers Stage 2 (Design). An accepted `intent.md` triggers a spec pass; a rejected intent is closed.
+1. Write the problem in ordinary language. Capture who is affected,
+   what better looks like, constraints, and how success will be
+   judged. Agents may draft; the originator corrects.
+2. Commit `intent/<slug>/intent.md` from the template.
+3. Product owner accepts or rejects. Accepting triggers a spec pass.
+4. Spec applies `AGENTS.md` and the architecture skills, flags
+   conflicts, and is accepted before planning.
+5. Plan names files, order, risks, and proof. Implementation follows
+   the accepted plan. If the diff departs, update `plan.md` in the
+   same commit.
+6. PR review checks the diff against `spec.md` and `plan.md`
+   (`REVIEW.md`). CI is `pnpm validate` and `pnpm test`.
+7. A breached production control becomes a new `intent.md`.
 
-Non-engineers do not need git — a GitHub connector lets Claude commit on their behalf.
+Humans accept at each gate. Agents draft artifacts and diffs; they
+do not approve them.
 
 ## Governance
 
-- Evidence: the committed `intent.md` + git history (author, timestamp, revisions).
-- Approval: product owner. High-risk intents also consult a tech lead.
-- Audit: `git log -- intent/` gives time from conversation to committed intent; survival rate = share of intents merged into `spec.md` vs closed.
+- Evidence: the committed markdown plus git history.
+- Approval: product owner for intent and spec (tech lead on
+  high-risk specs); engineer for routine plans (tech lead on
+  high-risk plans); human code owner for merge.
+- Audit: `git log -- intent/`.
 
 ## Metrics
 
+Read from git and CI, not from a separate report.
+
 | Signal | How to read |
 |---|---|
-| Leading — time to `intent.md` | `git log --diff-filter=A --format=%aI -- intent/<slug>/intent.md` |
-| Lagging — survival rate | accepted intents / total intents per month (PR merge vs close) |
-| Lagging — rework | `intent.md` commits after first `spec.md` for same slug |
+| Time to `intent.md` | `git log --diff-filter=A --format=%aI -- intent/<slug>/intent.md` |
+| Survival rate | accepted intents / total intents |
+| Rework | `intent.md` commits after the first `spec.md` for the same slug |
+| Spec rework | `spec.md` commits after the first `plan.md` |
+| Plan fidelity | whether the merged diff still matches `plan.md` |
 
 ## Creating a new intent
 

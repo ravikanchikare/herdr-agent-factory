@@ -1,11 +1,14 @@
-# SDLC — spec pointer
+# How we record work — spec pointer
 
-SDLC artifacts and process for this repo:
+Process artifacts for this repo:
 
-- **Process overview:** `docs/sdlc/README.md` — maps the [AI-native SDLC playbook](https://claude.com/blog/the-ai-native-sdlc-playbook) to this repo (stages, adoption order, governance).
-- **Intent home:** `intent/README.md` — layout, lifecycle, and governance for `intent/<slug>/intent.md` → `spec.md` → `plan.md`.
-- **Intent templates:** `intent/_template/` — `intent.md`, `spec.md`, `plan.md`.
-- **Review passes:** `REVIEW.md` — Stage 5 Deploy (bugs / security / compliance, severity, human threshold).
-- **Continuous evals:** `evals/README.md` — Stage 4 Test (suite, triggers, adding an eval).
+- **Process:** `docs/sdlc/README.md`
+- **Intent home:** `intent/README.md`
+- **Templates:** `intent/_template/`
+- **Current product record:**
+  `intent/2026-08-24-herdr-native-control-plane/`
+- **Review passes:** `REVIEW.md`
+- **Evals:** `evals/README.md`
 
-This file exists so `docs/spec/` cross-links to the SDLC docs without duplicating them.
+This file exists so `docs/spec/` can link the process without
+duplicating it.

@@ -36,6 +36,9 @@ jobs:
           failures=0
           for eval in evals/*.json; do
             [ -e "$eval" ] || continue
+            case "$eval" in
+              */_template.json) continue ;;
+            esac
             echo "::group::eval $eval"
             claude -p "$(jq -r '.prompt' "$eval")" \
               --allowedTools "Read,Edit,Bash" \

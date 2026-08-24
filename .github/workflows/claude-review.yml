@@ -1,6 +1,7 @@
 name: Claude Review
-# Stage 5 · Deploy — AI in the PR review loop (optional; enable when managed Code Review or Bedrock/Vertex key is available)
-# Requires: ANTHROPIC_API_KEY or AWS Bedrock / Vertex / Foundry credentials. See playbook "AI in the PR review loop".
+# Optional PR review against REVIEW.md. Enable with repository variable
+# CLAUDE_REVIEW_ENABLED=true. Requires ANTHROPIC_API_KEY or an equivalent
+# Bedrock / Vertex / Foundry credential.
 on:
   pull_request:
     types: [opened, synchronize, reopened]

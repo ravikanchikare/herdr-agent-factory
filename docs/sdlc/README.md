@@ -1,90 +1,68 @@
-# AI-native SDLC — Agent Factory adaptation
+# How we record and ship work
 
-Source playbook: <https://claude.com/blog/the-ai-native-sdlc-playbook> (Aug 21 2026, Louis Claxton).
-
-This document maps each play to how this repository runs it. The traditional linear SDLC becomes a loop where each accepted artifact fires the next gate; human attention concentrates at the gates, reviewing what agents flagged rather than restarting each stage.
+Agent Factory is built as a loop of committed artifacts. Each accepted
+artifact is what the next step reads. Humans review at the gates;
+agents draft the files in between.
 
 ```
-intent.md ──► spec.md ──► plan.md ──► diff + tests ──► PR + review findings ──► pipeline ──► production signal
-   ▲                                                                                                   │
-   └─────────────────────── breached control writes next intent.md ◄───────────────────────────────────┘
+intent.md ──► spec.md ──► plan.md ──► diff + tests ──► review + CI
+   ▲                                                          │
+   └──────── production failure writes the next intent.md ◄───┘
 ```
 
-## Shift table (this repo)
+The repo is the source of truth. Markdown, diffs, and PR history are
+the audit trail.
 
-| Stage | Traditional (before) | AI-native (this repo) |
+## Artifacts
+
+| Artifact | What it records | Who accepts |
 |---|---|---|
-| **Plan** | Backlog grooming, story points, refinement meetings | Originator brainstorms with Claude → versioned `intent/<slug>/intent.md` |
-| **Design** | Analysts → designers, lost context | One session: Claude turns `intent.md` into `spec.md` bounded by skills, versioned in git |
-| **Build** | Handwritten code, docs after | Claude Code plan mode → `plan.md`; knowledge in `CLAUDE.md` + `.claude/skills/*`; hooks guard |
-| **Test** | QA gates at boundaries | Continuous evals + session feedback loop (`make test`, build, screenshot) |
-| **Deploy** | Humans review every line, inconsistent | Agentic review passes per `REVIEW.md`; hooks as approval gates; humans approve regulated code |
-| **Maintain** | Humans watch prod | Agents monitor; breached control writes next `intent.md` |
+| `intent/<slug>/intent.md` | Problem, outcome, constraints, success | Product owner |
+| `intent/<slug>/spec.md` | Requirements, design, flagged concerns | Product owner; policy owners on flags |
+| `intent/<slug>/plan.md` | Files, order, risks, proof | Engineer; tech lead if high-risk |
+| Diff + tests | Implementation | Code owner via branch protection |
+| PR findings | Bugs, security, compliance (`REVIEW.md`) | Advisory; humans merge |
+| New `intent.md` | A production miss that must not recur | Product owner |
 
-## Plays and adoption order
+Templates live in `intent/_template/`. The current product is
+`intent/2026-08-24-herdr-native-control-plane/`.
 
-The plays are modular. Adoption order ≠ stage order — start with any clay play (no incoming dependencies). For other plays, adopt prerequisites first.
+## What agents read every session
 
-```
-clay (no deps):  intent.md  ·  CLAUDE.md  ·  feedback loop
-        ↓              ↓              ↓
-   spec.md      skills (institutional knowledge)
-        ↓              ↓
-     plan mode ──► hooks (guardrails) ──► parallel sessions / subagents ──► auto mode
-        ↓              ↓
-   continuous evals   PR review loop (REVIEW.md)
-                           ↓
-                    hooks as approval gates ──► CI/CD (pipeline)
-                           ↓
-                      maintain / loop close
-```
+- `AGENTS.md` — product direction and authority boundaries.
+- `CLAUDE.md` — commands, conventions, and recurring mistakes. Keep
+  it under a page. When a mistake happens twice, put the correction
+  here. Code owners approve changes.
+- `.claude/skills/` — institutional policy (`agent-factory-architecture`,
+  `herdr-authority`, `rust-ledger`, plus vendor skills). Advisory;
+  hooks and review enforce.
+- `.claude/hooks/` — fail-closed guardrails (generated bindings,
+  secrets, format, production gate).
+- `.claude/agents/` — scoped helpers (researcher, simplifier,
+  verifier).
 
-Recommended order for this repo (already partially in place):
+## Proof while building
 
-1. `intent/` home + templates (Stage 1) ✅ this commit
-2. Refresh `CLAUDE.md` (Stage 3) ✅
-3. Institutional skills (Stage 3) ✅
-4. Hooks as guardrails (Stage 3) ✅
-5. Feedback loop encoding (Stage 4) — via `CLAUDE.md` Verifying block + hook ✅
-6. `REVIEW.md` + AI review wiring (Stage 5) ✅
-7. `evals/` + `agent-evals.yml` (Stage 4) ✅
-8. Hooks as approval gates / managed settings (Stage 5) ✅
-9. Parallel sessions & subagents (Stage 3) ✅
-10. Maintain loop — incident → `intent.md` (Stage 6) — process, not code
+- `pnpm validate`, `pnpm test:web`, `cargo test --workspace`.
+- `evals/` when `CLAUDE.md` or `.claude/**` changes
+  (`.github/workflows/agent-evals.yml`).
+- `pnpm smoke:web` for static UI; `pnpm smoke` when native behavior
+  changed.
+- UI work is compared to an agreed screenshot, not only typechecked.
 
-## Artifacts and audit trail
+## Review and merge
 
-Each stage ends by committing one artifact the next stage reads:
+`REVIEW.md` defines three passes (bugs, security, compliance) and
+caps nits. Findings do not approve a PR. Branch protection requires
+a human code owner. The author of a diff cannot approve it.
 
-- `intent/<slug>/intent.md` — what is wanted, why, constraints (Stage 1)
-- `intent/<slug>/spec.md` — requirements + design, flagged concerns (Stage 2)
-- `intent/<slug>/plan.md` — files, order, risks, proof (Stage 3)
-- diff + tests — implementation (Stage 3/4)
-- PR + review findings — (Stage 5)
-- incident record → next `intent.md` — (Stage 6)
+## Measuring the loop
 
-The chain of commits is the audit trail: who asked, what the agent produced, who approved, which skill/hook versions were in force.
+Use git timestamps and CI, not a slide:
 
-## Repository specifics
-
-- **Intent home:** `intent/` in this repo (simplest for single product). Monorepo alternative would be `intent/` directory; multi-repo alternative would be a dedicated intent repo.
-- **Legacy tracker linkage:** If Linear/Jira is used, every `intent.md` carries `External record:` and every tracker ticket links the intent commit SHA. Repo is source of truth.
-- **CLAUDE.md:** Root file, <1 page, read at session start. Encodes commands, conventions, architecture pointers, verification, and recurring mistakes. Changes reviewed like code; code owners approve.
-- **Skills:** `.claude/skills/<name>/SKILL.md` with frontmatter `name` + `description` (trigger). Advisory controls — deterministic enforcement comes from hooks + review.
-- **Hooks:** `.claude/settings.json` + `.claude/hooks/*.sh`. Fast, file-scoped for build; heavier checks at commit/PR. Approval hooks belong to Stage 5 (not build) so they don't block parallel sessions.
-- **Subagents:** `.claude/agents/*.md` — scoped helpers (verifier, researcher, simplifier) with own context + tool limits.
-- **Review:** `REVIEW.md` at root defines passes (bugs, security, compliance vs `spec.md`/`plan.md`), severity (Important vs Nit), and caps.
-- **Evals:** `evals/*.json` + `.github/workflows/agent-evals.yml`. Run on schedule and on `CLAUDE.md` / `.claude/**` changes; block skill/CLAUDE changes that drop pass rate.
-
-## Governance per play
-
-See each artifact's dedicated doc for who approves and where evidence lives. Summary: `intent.md` — product owner; `spec.md` — product owner + policy owners for flagged concerns; `plan.md` — engineer (tech lead for high-risk); PR — human code owner via branch protection, informed by agentic findings.
-
-## How we measure it
-
-Read from git/CI/PR history, not manual reports.
-
-- Time to `intent.md`, `intent→spec`, `plan→merge` (git timestamps)
-- Survival rate, rework after `plan.md`, first-pass CI success
-- Review time to first review, Important vs Nit ratio, defects caught pre-merge vs escaped
-- Eval pass rate over time, time to turn an incident into a permanent eval
+- time from first conversation to committed `intent.md`;
+- time from `intent.md` to `spec.md` to `plan.md` to merge;
+- share of intents accepted vs closed;
+- rework after spec or plan is committed;
+- first-pass CI; Important vs Nit ratio;
+- eval pass rate; time from an incident to a permanent eval.

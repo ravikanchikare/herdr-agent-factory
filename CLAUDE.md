@@ -34,7 +34,10 @@ Healthy outputs: `cargo test` → `test result: ok`, `pnpm validate` → zero wa
 - Six authorities — one writer each (see `docs/spec/ownership.md`): Web UI (ephemeral view state), Native host (window/sidecar/transport), Rust (durable ledger + policy), Herdr (live topology/lifecycle), Git (repo facts), Orchestrator (workflow decisions via `agent-control` token).
 - Herdr never started/stopped by us; harnesses discovered from Herdr manifests only (`PATH` probing forbidden). Worktrees created via Herdr; Git is authority on path/branch/HEAD/dirty/diff.
 - `services/runtime/src/herdr_sessions.rs` is the only runtime module that touches the Herdr client. `crates/herdr-client` is the only crate speaking the Herdr socket.
-- Intent/spec/plan artifacts live in `intent/<slug>/` (see `intent/README.md`); chain of commits is the audit trail.
+- Change records live in `intent/<slug>/` (see `intent/README.md`).
+  The current product is
+  `intent/2026-08-24-herdr-native-control-plane/`. The commit chain is
+  the audit trail.
 
 ## Verifying your work
 
