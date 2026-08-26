@@ -100,14 +100,7 @@ fn reject_unintended_unknown(
     generated: &str,
     public: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    const INTENTIONALLY_OPAQUE: &[&str] = &[
-        "Event",
-        "Frame",
-        "Request",
-        "Response",
-        "RespondElicitationParams",
-        "SessionStartResultDto",
-    ];
+    const INTENTIONALLY_OPAQUE: &[&str] = &["Event", "Frame", "Request", "Response"];
     if public && generated.contains("unknown") && !INTENTIONALLY_OPAQUE.contains(&name) {
         return Err(format!(
             "public wire type `{name}` contains an untyped field; model it explicitly or add a narrowly justified opaque exception"

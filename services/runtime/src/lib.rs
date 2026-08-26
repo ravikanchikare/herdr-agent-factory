@@ -794,17 +794,7 @@ impl Runtime {
                     "environmentId is required when starting the first Run".into(),
                 )
             })?;
-            let created = self.create_run(Uuid::new_v4(), draft.id, environment_id)?;
-            let run_id = created
-                .result
-                .get("run")
-                .and_then(|run| run.get("id"))
-                .and_then(Value::as_str)
-                .and_then(|id| Uuid::parse_str(id).ok())
-                .ok_or_else(|| {
-                    DispatchError::InvalidParams("new Run identity is missing".into())
-                })?;
-            let _ = run_id;
+            self.create_run(Uuid::new_v4(), draft.id, environment_id)?;
         }
         let revision = self.store.snapshot()?.revision;
         Ok(DispatchResult {
@@ -4377,13 +4367,8 @@ fn draft_worktree_path(
 ) -> Result<PathBuf, DispatchError> {
     let worktrees_directory =
         RepositoryConfig::load(repository)?.prepare_worktrees_directory(repository)?;
-    let repository_name = repository
-        .file_name()
-        .and_then(|name| name.to_str())
-        .ok_or_else(|| DispatchError::InvalidParams("repository name is not valid UTF-8".into()))?;
     // The directory already sits inside this repository, so repeating the
     // repository's name in every entry only makes them harder to tell apart.
-    let _ = repository_name;
     let path = worktrees_directory.join(worktree_directory_name(agent_name, draft_name, draft_id));
     reject_path_collision(&path)?;
     Ok(path)
@@ -4667,13 +4652,6 @@ fn normalize_session_title(title: &str) -> Option<String> {
     Some(truncated)
 }
 
-/// Whether this session still owes its agent the opening brief.
-///
-/// Delivery is its own durable fact rather than a lifecycle value. Herdr reports
-/// an agent sitting on its startup screen as idle, so a lifecycle-encoded marker
-/// has two writers — the brief state machine and reconciliation against Herdr —
-/// and whichever writes last decides whether the brief is ever retried.
-/// The run state as the Orchestrator sees it, and as the CLI prints it.
 /// Where the `agent-factory` command lives. It is installed beside the runtime,
 /// so the runtime's own location is the answer in development and when packaged.
 fn control_cli_directory() -> Option<PathBuf> {
@@ -4681,6 +4659,7 @@ fn control_cli_directory() -> Option<PathBuf> {
     Some(executable.parent()?.to_path_buf())
 }
 
+/// The run state as the Orchestrator sees it, and as the CLI prints it.
 fn run_state_label(state: FactoryRunState) -> &'static str {
     match state {
         FactoryRunState::Draft => "draft",
@@ -4738,6 +4717,12 @@ fn run_view(
     }
 }
 
+/// Whether this session still owes its agent the opening brief.
+///
+/// Delivery is its own durable fact rather than a lifecycle value. Herdr reports
+/// an agent sitting on its startup screen as idle, so a lifecycle-encoded marker
+/// has two writers — the brief state machine and reconciliation against Herdr —
+/// and whichever writes last decides whether the brief is ever retried.
 fn awaiting_initial_prompt(session: &AgentSessionProjection) -> bool {
     !session.brief_delivered
         && session.outcome.is_none()
@@ -5044,6 +5029,8 @@ fn current_macos_version() -> Result<String, DispatchError> {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct UpdateHelperResponse {
     ok: bool,
+    /// Present on success; this caller only needs the failure reason.
+    #[allow(dead_code)]
     result: Option<Value>,
     error: Option<Value>,
 }
@@ -5098,7 +5085,6 @@ fn invoke_update_helper(helper: &Path, request: Value) -> Result<(), DispatchErr
         ));
     }
     let response: UpdateHelperResponse = serde_json::from_slice(&output)?;
-    let _ = response.result;
     if !status.success() || !response.ok {
         return Err(DispatchError::UpdateHelper(format!(
             "updater helper failed: {}",
@@ -5604,8 +5590,6 @@ fn herdr_provider_overrides() -> [(&'static str, &'static str); 4] {
     ]
 }
 
-/// Claude reads `ANTHROPIC_MODEL` from the inherited shell, so start it with
-/// an explicit `--model` that matches the Environment default.
 /// How the Environment's permission policy is expressed to the harness.
 ///
 /// A Factory Run is meant to advance without a person watching it, so an agent
@@ -5635,6 +5619,8 @@ fn harness_permission_args(
     }
 }
 
+/// Claude reads `ANTHROPIC_MODEL` from the inherited shell, so start it with
+/// an explicit `--model` that matches the Environment default.
 fn harness_start_args(
     harness_id: &str,
     model: &str,

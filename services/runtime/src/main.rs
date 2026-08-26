@@ -1,12 +1,11 @@
 use std::collections::HashSet;
 use std::env;
-use std::ffi::{OsStr, OsString};
-use std::io::{self, BufReader, BufWriter, Read, Seek};
-use std::path::{Path, PathBuf};
-use std::process::{Command, Stdio};
+use std::ffi::OsStr;
+use std::io::{self, BufReader, BufWriter};
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::mpsc;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use agent_factory_runtime::{
     AgentControlService, EnvironmentServicePaths, RUNTIME_NAME, RUNTIME_VERSION, Runtime,
@@ -116,16 +115,13 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-const LOGIN_SHELL_TIMEOUT: Duration = Duration::from_secs(2);
-const MAX_LOGIN_PATH_BYTES: u64 = 64 * 1024;
-
 fn agent_search_paths() -> Vec<PathBuf> {
     let inherited = env::var_os("PATH")
         .map(|value| env::split_paths(&value).collect::<Vec<_>>())
         .unwrap_or_default();
 
     #[cfg(target_os = "macos")]
-    let login = login_shell_search_paths();
+    let login = login_shell::search_paths();
     #[cfg(not(target_os = "macos"))]
     let login = Vec::new();
 
@@ -144,74 +140,111 @@ fn merge_search_paths(
         .collect()
 }
 
+/// Everything a Finder-launched macOS binary needs to learn the user's real
+/// PATH from their login shell.
 #[cfg(target_os = "macos")]
-fn login_shell_search_paths() -> Vec<PathBuf> {
-    let shell = env::var_os("SHELL")
-        .map(PathBuf::from)
-        .unwrap_or_else(|| PathBuf::from("/bin/zsh"));
-    let environment = ["HOME", "USER", "LOGNAME", "SHELL", "LANG"]
-        .into_iter()
-        .filter_map(|name| env::var_os(name).map(|value| (OsString::from(name), value)))
-        .chain(env::vars_os().filter(|(name, _)| name.as_encoded_bytes().starts_with(b"LC_")))
-        .collect::<Vec<_>>();
-    query_login_shell_path(&shell, &environment, LOGIN_SHELL_TIMEOUT).unwrap_or_default()
-}
+mod login_shell {
+    use std::env;
+    use std::ffi::{OsStr, OsString};
+    use std::io::{self, Read, Seek};
+    use std::path::{Path, PathBuf};
+    use std::process::{Command, Stdio};
+    use std::time::{Duration, Instant};
 
-#[cfg(target_os = "macos")]
-fn query_login_shell_path(
-    shell: &Path,
-    environment: &[(OsString, OsString)],
-    timeout: Duration,
-) -> io::Result<Vec<PathBuf>> {
-    if !shell.is_absolute() || !shell.is_file() {
-        return Ok(Vec::new());
+    const LOGIN_SHELL_TIMEOUT: Duration = Duration::from_secs(2);
+    const MAX_LOGIN_PATH_BYTES: u64 = 64 * 1024;
+
+    pub(super) fn search_paths() -> Vec<PathBuf> {
+        let shell = env::var_os("SHELL")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| PathBuf::from("/bin/zsh"));
+        let environment = ["HOME", "USER", "LOGNAME", "SHELL", "LANG"]
+            .into_iter()
+            .filter_map(|name| env::var_os(name).map(|value| (OsString::from(name), value)))
+            .chain(env::vars_os().filter(|(name, _)| name.as_encoded_bytes().starts_with(b"LC_")))
+            .collect::<Vec<_>>();
+        query_login_shell_path(&shell, &environment, LOGIN_SHELL_TIMEOUT).unwrap_or_default()
     }
 
-    // A Finder-launched application receives only the system PATH. Ask the
-    // user's configured login shell for its PATH once, with a fixed command,
-    // a minimal environment, bounded output, and a startup deadline. Agent
-    // processes are still launched directly by absolute path, never through
-    // the shell.
-    let mut output = tempfile::tempfile()?;
-    let child_output = output.try_clone()?;
-    let mut command = Command::new(shell);
-    command
-        .args(["-l", "-c", "/usr/bin/printenv PATH"])
-        .env_clear()
-        .envs(environment.iter().cloned())
-        .stdin(Stdio::null())
-        .stdout(Stdio::from(child_output))
-        .stderr(Stdio::null());
-    let mut child = command.spawn()?;
-    let deadline = Instant::now() + timeout;
-    loop {
-        match child.try_wait()? {
-            Some(status) if status.success() => break,
-            Some(_) => return Ok(Vec::new()),
-            None if Instant::now() < deadline => {
-                std::thread::sleep(Duration::from_millis(10));
-            }
-            None => {
-                let _ = child.kill();
-                let _ = child.wait();
-                return Ok(Vec::new());
+    fn query_login_shell_path(
+        shell: &Path,
+        environment: &[(OsString, OsString)],
+        timeout: Duration,
+    ) -> io::Result<Vec<PathBuf>> {
+        if !shell.is_absolute() || !shell.is_file() {
+            return Ok(Vec::new());
+        }
+
+        // A Finder-launched application receives only the system PATH. Ask the
+        // user's configured login shell for its PATH once, with a fixed command,
+        // a minimal environment, bounded output, and a startup deadline. Agent
+        // processes are still launched directly by absolute path, never through
+        // the shell.
+        let mut output = tempfile::tempfile()?;
+        let child_output = output.try_clone()?;
+        let mut command = Command::new(shell);
+        command
+            .args(["-l", "-c", "/usr/bin/printenv PATH"])
+            .env_clear()
+            .envs(environment.iter().cloned())
+            .stdin(Stdio::null())
+            .stdout(Stdio::from(child_output))
+            .stderr(Stdio::null());
+        let mut child = command.spawn()?;
+        let deadline = Instant::now() + timeout;
+        loop {
+            match child.try_wait()? {
+                Some(status) if status.success() => break,
+                Some(_) => return Ok(Vec::new()),
+                None if Instant::now() < deadline => {
+                    std::thread::sleep(Duration::from_millis(10));
+                }
+                None => {
+                    let _ = child.kill();
+                    let _ = child.wait();
+                    return Ok(Vec::new());
+                }
             }
         }
+
+        output.rewind()?;
+        let mut bytes = Vec::new();
+        output
+            .take(MAX_LOGIN_PATH_BYTES + 1)
+            .read_to_end(&mut bytes)?;
+        if bytes.len() as u64 > MAX_LOGIN_PATH_BYTES {
+            return Ok(Vec::new());
+        }
+        let value = std::str::from_utf8(&bytes).ok().map(str::trim);
+        Ok(value
+            .filter(|value| !value.is_empty())
+            .map(|value| env::split_paths(OsStr::new(value)).collect())
+            .unwrap_or_default())
     }
 
-    output.rewind()?;
-    let mut bytes = Vec::new();
-    output
-        .take(MAX_LOGIN_PATH_BYTES + 1)
-        .read_to_end(&mut bytes)?;
-    if bytes.len() as u64 > MAX_LOGIN_PATH_BYTES {
-        return Ok(Vec::new());
+    #[cfg(test)]
+    mod tests {
+        use std::fs;
+
+        use super::*;
+
+        #[test]
+        fn login_shell_path_is_split_without_interpreting_output_as_commands() {
+            use std::os::unix::fs::PermissionsExt;
+
+            let directory = tempfile::tempdir().unwrap();
+            let shell = directory.path().join("login-shell");
+            fs::write(&shell, "#!/bin/sh\nprintf '/user/bin:/opt/tools/bin\\n'\n").unwrap();
+            let mut permissions = fs::metadata(&shell).unwrap().permissions();
+            permissions.set_mode(0o755);
+            fs::set_permissions(&shell, permissions).unwrap();
+
+            assert_eq!(
+                query_login_shell_path(&shell, &[], Duration::from_secs(1)).unwrap(),
+                [PathBuf::from("/user/bin"), PathBuf::from("/opt/tools/bin")]
+            );
+        }
     }
-    let value = std::str::from_utf8(&bytes).ok().map(str::trim);
-    Ok(value
-        .filter(|value| !value.is_empty())
-        .map(|value| env::split_paths(OsStr::new(value)).collect())
-        .unwrap_or_default())
 }
 
 fn runtime_secret_store()
@@ -234,10 +267,14 @@ fn production_secret_store()
     )?))
 }
 
+#[cfg(not(target_os = "macos"))]
+fn production_secret_store()
+-> Result<Arc<dyn platform_secrets::SecretStore>, Box<dyn std::error::Error>> {
+    Ok(Arc::new(platform_secrets::InMemorySecretStore::default()))
+}
+
 #[cfg(test)]
 mod tests {
-    use std::fs;
-
     use super::*;
 
     #[test]
@@ -250,28 +287,4 @@ mod tests {
             [PathBuf::from("/user/bin"), PathBuf::from("/system/bin")]
         );
     }
-
-    #[cfg(target_os = "macos")]
-    #[test]
-    fn login_shell_path_is_split_without_interpreting_output_as_commands() {
-        use std::os::unix::fs::PermissionsExt;
-
-        let directory = tempfile::tempdir().unwrap();
-        let shell = directory.path().join("login-shell");
-        fs::write(&shell, "#!/bin/sh\nprintf '/user/bin:/opt/tools/bin\\n'\n").unwrap();
-        let mut permissions = fs::metadata(&shell).unwrap().permissions();
-        permissions.set_mode(0o755);
-        fs::set_permissions(&shell, permissions).unwrap();
-
-        assert_eq!(
-            query_login_shell_path(&shell, &[], Duration::from_secs(1)).unwrap(),
-            [PathBuf::from("/user/bin"), PathBuf::from("/opt/tools/bin")]
-        );
-    }
-}
-
-#[cfg(not(target_os = "macos"))]
-fn production_secret_store()
--> Result<Arc<dyn platform_secrets::SecretStore>, Box<dyn std::error::Error>> {
-    Ok(Arc::new(platform_secrets::InMemorySecretStore::default()))
 }

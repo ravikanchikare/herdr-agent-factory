@@ -333,11 +333,9 @@ describe("WorkspaceShell Draft contextual column", () => {
   it("opens Versions inside the Draft without a legacy web terminal", async () => {
     render(<StatefulShell initial={projectionWithDrafts()} />)
 
-    // Version dropdown removed from Details header per design refinement.
     expect(screen.queryByRole("combobox", {
       name: "Open version selector",
     })).toBeNull()
-    // Draft region still renders without version picker.
     expect(screen.getByRole("region", {
       name: "Commerce Copilot Draft",
     })).toBeTruthy()
@@ -345,7 +343,6 @@ describe("WorkspaceShell Draft contextual column", () => {
 
   it("drops Version when the owning Draft is switched or closed", async () => {
     render(<StatefulShell initial={projectionWithDrafts()} />)
-    // No version picker in header — switching drafts no longer involves version tabs here.
     expect(screen.queryByRole("combobox", {
       name: "Open version selector",
     })).toBeNull()
@@ -409,7 +406,6 @@ describe("WorkspaceShell Draft contextual column", () => {
     }))
     expect(screen.getByRole("complementary", { name: "Draft Overview" }))
       .toBeTruthy()
-    // No version picker in empty draft header after refinement.
     expect(screen.queryByRole("combobox", {
       name: "Open version selector",
     })).toBeNull()

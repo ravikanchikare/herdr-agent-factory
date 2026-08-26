@@ -1071,7 +1071,7 @@
     },
     "EnvironmentConfigurationDraft": {
       "additionalProperties": false,
-      "description": "An Environment's complete configuration, as authored in one form.\n\nCreating and saving carry the same payload so there is exactly one shape to\nreason about, and a save can never land a mix of two edits. Note the absence\nof an id: it is derived from the name by the runtime and is stable across\nrenames.\n\nAgents and permission policies are deliberately not here — they remain\nruntime-owned constants rather than form fields.",
+      "description": "An Environment's complete configuration, as authored in one form.\n\nCreating and saving carry the same payload so there is exactly one shape to\nreason about, and a save can never land a mix of two edits. Note the absence\nof an id: it is derived from the name by the runtime and is stable across\nrenames.",
       "properties": {
         "environmentVariables": {
           "items": {
@@ -2024,7 +2024,6 @@
     },
     "InstallPluginParams": {
       "additionalProperties": false,
-      "description": "Origin of a previewed registry public key.\nCandidate registry fields resolved from a repository URL for review.",
       "properties": {
         "pluginId": {
           "type": "string"

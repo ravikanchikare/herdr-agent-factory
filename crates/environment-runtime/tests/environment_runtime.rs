@@ -333,7 +333,7 @@ fn rejects_schema_shape_duplicates_and_malformed_references() {
         },
         |value: &mut Value| {
             value["environmentVariables"] =
-                json!({"TOKEN": {"secretRef": "secret_ABCDEF0123456789ABCDEF0123456789"}})
+                json!({"TOKEN": {"secretRef": "secret_ABCDEF0123456789ABCDEF012345678G"}})
         },
         |value: &mut Value| {
             value["plugins"] = json!([

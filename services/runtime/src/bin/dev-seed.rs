@@ -53,6 +53,18 @@ fn main() {
     }
 }
 
+#[cfg(target_os = "macos")]
+fn secret_store() -> Result<Arc<dyn platform_secrets::SecretStore>, Box<dyn std::error::Error>> {
+    Ok(Arc::new(platform_secrets::MacOsKeychain::new(
+        "app.agentfactory.desktop",
+    )?))
+}
+
+#[cfg(not(target_os = "macos"))]
+fn secret_store() -> Result<Arc<dyn platform_secrets::SecretStore>, Box<dyn std::error::Error>> {
+    Ok(Arc::new(platform_secrets::InMemorySecretStore::default()))
+}
+
 fn seed() -> Result<(), Box<dyn std::error::Error>> {
     let data_directory = agent_factory_runtime::application_data_directory()?;
     reset(&data_directory)?;
@@ -67,9 +79,7 @@ fn seed() -> Result<(), Box<dyn std::error::Error>> {
             user_environments: data_directory.join("environments"),
             plugins: data_directory.join("plugins"),
         },
-        Arc::new(platform_secrets::MacOsKeychain::new(
-            "app.agentfactory.desktop",
-        )?),
+        secret_store()?,
     )?;
 
     // 1-2. Providers — each points at its own secret, and allows a model it
