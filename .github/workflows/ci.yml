@@ -58,6 +58,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: cargo build --package agent-factory-runtime
       - run: pnpm --filter @agent-factory/web-ui build
+      # zig-pkg dependencies shell out to bare `zig env` during builds. The
+      # Native CLI installs the pinned toolchain under this exact path, but a
+      # runner's PATH never includes it the way a developer shell does.
+      - name: Expose the pinned Zig toolchain on PATH
+        run: echo "$HOME/.native/toolchains/zig-0.16.0" >> "$GITHUB_PATH"
       - run: pnpm exec native validate apps/native-host/app.zon
       - run: pnpm exec native test apps/native-host --yes
       - run: pnpm exec native build apps/native-host --yes -Doptimize=ReleaseFast

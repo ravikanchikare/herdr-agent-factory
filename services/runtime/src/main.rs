@@ -6,7 +6,9 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::Arc;
 use std::sync::mpsc;
-use std::time::{Duration, Instant};
+use std::time::Duration;
+#[cfg(target_os = "macos")]
+use std::time::Instant;
 
 use agent_factory_runtime::{
     AgentControlService, EnvironmentServicePaths, RUNTIME_NAME, RUNTIME_VERSION, Runtime,

@@ -86,6 +86,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # zig-pkg dependencies shell out to bare `zig env` during builds; a
+          # runner's PATH never includes the toolchain a developer shell has.
+          export PATH="$HOME/.native/toolchains/zig-0.16.0:$PATH"
           pnpm exec native build apps/native-host --yes -Dplatform=null
           sdk_zig="$HOME/.native/toolchains/zig-0.16.0/zig"
           test -x "$sdk_zig"
