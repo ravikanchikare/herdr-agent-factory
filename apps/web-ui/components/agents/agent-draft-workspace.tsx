@@ -12,7 +12,6 @@ import {
   LoaderCircleIcon,
   PlayIcon,
   TagIcon,
-  TerminalIcon,
   TriangleAlertIcon,
 } from "lucide-react"
 

@@ -20,9 +20,6 @@ use herdr_client::{
     WorktreeRemoved, default_terminal_size, resolve_herdr_bin,
 };
 
-/// Herdr workspace labels are human-readable and stable across restarts. The
-/// short binding suffix disambiguates same-named bindings without exposing a
-/// full opaque identifier in Herdr's UI.
 /// Transcript rows requested per read. Enough for a full agent response without
 /// asking Herdr to walk its whole scrollback each time.
 const TRANSCRIPT_LINES: u32 = 400;
@@ -1088,6 +1085,9 @@ pub(crate) fn agent_name(prefix: &str, context: &str, session_id: uuid::Uuid) ->
     format!("{prefix}-{context}-{suffix}")
 }
 
+/// Herdr workspace labels are human-readable and stable across restarts. The
+/// short binding suffix disambiguates same-named bindings without exposing a
+/// full opaque identifier in Herdr's UI.
 pub(crate) fn workspace_label(
     target_agent_name: &str,
     binding_name: &str,

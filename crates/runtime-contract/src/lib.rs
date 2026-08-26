@@ -663,8 +663,6 @@ pub struct RegistryCatalogDto {
     pub plugins: Vec<RegistryCatalogPluginDto>,
 }
 
-/// Origin of a previewed registry public key.
-/// Candidate registry fields resolved from a repository URL for review.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct InstallPluginParams {
@@ -795,9 +793,6 @@ pub struct UpdateStatusDto {
 /// reason about, and a save can never land a mix of two edits. Note the absence
 /// of an id: it is derived from the name by the runtime and is stable across
 /// renames.
-///
-/// Agents and permission policies are deliberately not here — they remain
-/// runtime-owned constants rather than form fields.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct EnvironmentConfigurationDraft {

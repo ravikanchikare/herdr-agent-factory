@@ -750,7 +750,6 @@ test("title-bar Version selector opens a horizontally stacked read-only inspecto
   await page.goto("/")
   const pane = page.getByRole("region", { name: "Commerce Copilot pane" })
   const titleBar = pane.locator("header").first()
-  // Version dropdown removed from Details header per design refinement.
   await expect(titleBar.getByRole("combobox", {
     name: "Open version selector",
   })).toHaveCount(0)
@@ -876,7 +875,6 @@ test("Draft Overview switches between inline and popover modes", async ({ page }
   })
 
   await expect(titleBar.getByText("Draft", { exact: true })).toBeVisible()
-  // Version dropdown removed from Details header per design refinement.
   await expect(titleBar.getByRole("combobox", {
     name: "Open version selector",
   })).toHaveCount(0)
@@ -1043,7 +1041,6 @@ test("an Agent with no active Draft offers Versions in the title bar", async ({ 
     .toHaveCount(0)
   const pane = page.getByRole("region", { name: /pane$/ })
   const titleBar = pane.locator("header").first()
-  // Version dropdown removed from title-bar per design refinement.
   await expect(titleBar.getByRole("combobox", { name: "Open version selector" })).toHaveCount(0)
   await expectNoAxeViolations(page)
 })

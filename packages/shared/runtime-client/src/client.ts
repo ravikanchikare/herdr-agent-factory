@@ -1786,14 +1786,6 @@ function updateTerminalState(
   }
 }
 
-function nextTerminalTitle(terminals: readonly TerminalProjection[]) {
-  const highest = terminals.reduce((value, terminal) => {
-    const match = /^Terminal (\d+)$/.exec(terminal.title)
-    return match ? Math.max(value, Number(match[1])) : value
-  }, 0)
-  return `Terminal ${highest + 1}`
-}
-
 function isRuntimeEvent(value: unknown): value is RuntimeEvent {
   if (!value || typeof value !== "object") return false
   const event = value as Partial<RuntimeEvent>

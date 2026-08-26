@@ -464,18 +464,7 @@ fn deserialize_secret_ref<'de, D>(
 where
     D: Deserializer<'de>,
 {
-    let value = String::deserialize(deserializer)?;
-    let suffix = value
-        .strip_prefix("secret_")
-        .ok_or_else(|| serde::de::Error::custom("invalid opaque secret reference"))?;
-    if suffix.len() != 32
-        || !suffix
-            .bytes()
-            .all(|byte| byte.is_ascii_digit() || matches!(byte, b'a'..=b'f'))
-    {
-        return Err(serde::de::Error::custom("invalid opaque secret reference"));
-    }
-    value
+    String::deserialize(deserializer)?
         .parse()
         .map_err(|_| serde::de::Error::custom("invalid opaque secret reference"))
 }
