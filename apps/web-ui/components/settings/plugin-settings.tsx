@@ -127,6 +127,7 @@ export function PluginSettings({
   const [filter, setFilter] = React.useState<FilterValue>("all")
   const [pendingAction, setPendingAction] = React.useState<PendingAction>()
   const [confirmUninstall, setConfirmUninstall] = React.useState<string>()
+  const [initialLoadPending, setInitialLoadPending] = React.useState(true)
   const refreshedRef = React.useRef<Set<string>>(new Set())
 
   const { installed, localMcpServers } = projection.plugins
@@ -176,27 +177,33 @@ export function PluginSettings({
     void Promise.all([
       emitIntent({ type: "registry.list" }),
       emitIntent({ type: "plugin.list" }),
-    ])
+    ]).finally(() => setInitialLoadPending(false))
   }, [emitIntent])
 
   React.useEffect(() => {
+    if (initialLoadPending) return
     const loadedRegistryIds = new Set(
       projection.pluginCatalogs.map((catalog) => catalog.registryId),
     )
-    for (const registry of projection.pluginRegistries) {
-      if (
-        loadedRegistryIds.has(registry.id) ||
-        refreshedRef.current.has(registry.id)
-      ) {
-        continue
-      }
+    const registriesToRefresh = projection.pluginRegistries.filter(
+      (registry) =>
+        !loadedRegistryIds.has(registry.id) &&
+        !refreshedRef.current.has(registry.id),
+    )
+    if (registriesToRefresh.length === 0) return
+    for (const registry of registriesToRefresh) {
       refreshedRef.current.add(registry.id)
       void emitIntent({
         type: "registry.refresh",
         registryId: registry.id,
       })
     }
-  }, [emitIntent, projection.pluginCatalogs, projection.pluginRegistries])
+  }, [
+    emitIntent,
+    initialLoadPending,
+    projection.pluginCatalogs,
+    projection.pluginRegistries,
+  ])
 
   // Suppress noisy background registry fetch failures; show inline instead.
   // User-initiated actions (install/uninstall) still toast via pendingAction.
@@ -325,12 +332,15 @@ export function PluginSettings({
   }
 
   const isCatalogLoading =
-    projection.pluginRegistries.length === 0 ||
-    projection.pluginRegistries.some(
-      (registry) =>
-        !projection.pluginCatalogs.some(
-          (catalog) => catalog.registryId === registry.id,
-        ),
+    initialLoadPending ||
+    (
+      projection.pluginError === undefined &&
+      projection.pluginRegistries.some(
+        (registry) =>
+          !projection.pluginCatalogs.some(
+            (catalog) => catalog.registryId === registry.id,
+          ),
+      )
     )
 
   return (

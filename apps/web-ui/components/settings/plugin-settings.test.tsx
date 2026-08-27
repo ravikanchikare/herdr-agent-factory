@@ -157,6 +157,28 @@ describe("PluginSettings", () => {
     expect(screen.queryByText(/catalog url/i)).not.toBeInTheDocument()
   })
 
+  it("shows a registry failure instead of loading forever", async () => {
+    renderPluginSettings({
+      ...baseProjection,
+      pluginCatalogs: [],
+      pluginError: "registry download failed",
+    })
+
+    expect(await screen.findByText(/Registry unavailable/)).toHaveTextContent(
+      "registry download failed",
+    )
+  })
+
+  it("shows an empty marketplace when no registries are configured", async () => {
+    renderPluginSettings({
+      ...baseProjection,
+      pluginRegistries: [],
+      pluginCatalogs: [],
+    })
+
+    expect(await screen.findByText("No plugins available")).toBeVisible()
+  })
+
   it("searches and filters marketplace plugins", () => {
     renderPluginSettings({
       ...baseProjection,
