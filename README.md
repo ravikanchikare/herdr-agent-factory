@@ -18,7 +18,7 @@ surface. It owns the Workspaces, panes, processes, terminals, and lifecycle of
 the agents doing the work. Agent Factory supplies the product definition,
 control policy, history, and user experience around that runtime.
 
-![Agent Factory Draft overview with Herdr agents and a live workspace terminal](assets/application.png)
+![Agent Factory conversational Run composer, Draft overview, and Run History](assets/factory-run.png)
 
 ## From a goal to an improved agent
 
@@ -33,6 +33,8 @@ the harnesses, model policy, permissions, variables, Skills, and MCP tools
 available to the agents in a Factory Run. This makes the same factory reusable:
 different targets can use different capabilities without changing the factory
 itself.
+
+![Agent Factory Environment configuration](assets/environment.png)
 
 When a Run starts, Agent Factory creates a fresh Orchestrator session through
 Herdr. The Orchestrator turns the objective into work, delegates it to
@@ -94,6 +96,8 @@ permissions, Skills, and tools can be selected for different responsibilities.
 Herdr discovers the available harness kinds; Agent Factory does not bundle or
 install agents and does not start or manage the Herdr server.
 
+![Herdr-discovered harnesses available to Agent Factory](assets/harnesses.png)
+
 Only the Orchestrator receives authority to issue semantic Run commands.
 Coding, Evaluation, and any other managed agents receive the context
 they need, but cannot silently advance or finish the Run.
@@ -116,6 +120,8 @@ Herdr remains the source of truth for what is running now. Agent Factory keeps
 the durable reason the work exists, the managed-session lineage, accepted
 evidence, and final result. Closing a pane does not cancel a Run, and a terminal
 lifecycle label never manufactures a semantic verdict.
+
+![Agent Factory Draft overview with Herdr agents and a live workspace terminal](assets/application.png)
 
 ## A factory, not another single-agent framework
 
