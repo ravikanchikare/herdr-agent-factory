@@ -48,12 +48,14 @@ export function RuntimeApplication({
       runId: string,
       agentDraftId: string,
       environmentId: string,
+      objective: string,
     ) => {
       await client.dispatch({
         type: "factoryRun.create",
         runId,
         agentDraftId,
         environmentId,
+        objective,
       })
     },
     [client],

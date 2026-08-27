@@ -389,6 +389,7 @@ export type RuntimeIntent =
       runId: string
       agentDraftId: string
       environmentId: string
+      objective: string
     }
   | { type: "factoryRun.cancel"; runId: string }
   | { type: "agentDraft.toggleWorkspace"; agentDraftId: string }

@@ -9,8 +9,6 @@ import {
   GitBranchIcon,
   Globe2Icon,
   HistoryIcon,
-  LoaderCircleIcon,
-  PlayIcon,
   TagIcon,
   TriangleAlertIcon,
 } from "lucide-react"
@@ -32,6 +30,35 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@agent-factory/ui/components/alert"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@agent-factory/ui/components/alert-dialog"
+import {
+  Conversation,
+  ConversationContent,
+  ConversationScrollButton,
+} from "@agent-factory/ui/components/ai-elements/conversation"
+import {
+  Message,
+  MessageContent,
+  MessageLabel,
+} from "@agent-factory/ui/components/ai-elements/message"
+import {
+  PromptInput,
+  PromptInputBody,
+  PromptInputFooter,
+  PromptInputSubmit,
+  PromptInputTextarea,
+  PromptInputTools,
+  type PromptInputMessage,
+} from "@agent-factory/ui/components/ai-elements/prompt-input"
 import { Shimmer } from "@agent-factory/ui/components/ai-elements/shimmer"
 import { Badge } from "@agent-factory/ui/components/badge"
 import { Button } from "@agent-factory/ui/components/button"
@@ -98,7 +125,10 @@ export type DraftWorkflowChrome = {
   publishDisabled: boolean
   onEdit: () => void
   onCreateVersion: () => void
+  onOpenRunHistory?: () => void
   onCreateDraft?: () => void
+  discardDisabled?: boolean
+  onDiscardDraft?: () => void
 }
 
 /** Display worktree as a sibling-relative path; copy still uses the full path. */
@@ -121,7 +151,6 @@ export function AgentDraftWorkspace({
   emitIntent,
   startDraftRun,
   sidebarOpen = true,
-  nativeTerminalVisible = false,
   onDraftWorkflowChange,
   onEditStateChange,
   versionSurface,
@@ -143,9 +172,9 @@ export function AgentDraftWorkspace({
     runId: string,
     draftId: string,
     environmentId: string,
+    objective: string,
   ) => Promise<void>
   sidebarOpen?: boolean
-  nativeTerminalVisible?: boolean
   onDraftWorkflowChange?: (chrome: DraftWorkflowChrome | null) => void
   onEditStateChange?: (editing: boolean) => void
   versionSurface?: React.ReactNode
@@ -175,7 +204,6 @@ export function AgentDraftWorkspace({
       emitIntent={emitIntent}
       startDraftRun={startDraftRun}
       sidebarOpen={sidebarOpen}
-      nativeTerminalVisible={nativeTerminalVisible}
       onDraftWorkflowChange={onDraftWorkflowChange}
       onEditStateChange={handleEditStateChange}
       readAgentTranscript={readAgentTranscript}
@@ -504,7 +532,6 @@ function DraftEditor({
   emitIntent,
   startDraftRun,
   sidebarOpen,
-  nativeTerminalVisible,
   onDraftWorkflowChange,
   onEditStateChange,
   readAgentTranscript,
@@ -523,15 +550,15 @@ function DraftEditor({
     runId: string,
     draftId: string,
     environmentId: string,
+    objective: string,
   ) => Promise<void>
   sidebarOpen: boolean
-  nativeTerminalVisible: boolean
   onDraftWorkflowChange?: (chrome: DraftWorkflowChrome | null) => void
   onEditStateChange?: (editing: boolean) => void
   readAgentTranscript?: ReadAgentTranscript
 }) {
   const [editOpen, setEditOpen] = React.useState(false)
-  const [dialog, setDialog] = React.useState<"publish">()
+  const [dialog, setDialog] = React.useState<"publish" | "discard">()
   const readyEnvironments = environments.filter(
     (environment) => environment.readiness.state === "ready",
   )
@@ -567,10 +594,19 @@ function DraftEditor({
       publishDisabled: Boolean(liveRun),
       onEdit: () => setEditOpen(true),
       onCreateVersion: () => setDialog("publish"),
+      discardDisabled: Boolean(liveRun),
+      onDiscardDraft: () => setDialog("discard"),
+      onOpenRunHistory: () => {
+        document.getElementById(`run-history-${draft.id}`)?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        })
+      },
     })
     return () => onDraftWorkflowChange(null)
   }, [
     canEdit,
+    draft.id,
     draft.name,
     liveRun,
     onDraftWorkflowChange,
@@ -650,7 +686,6 @@ function DraftEditor({
           dirty={false}
           emitIntent={emitIntent}
           startDraftRun={startDraftRun}
-          nativeTerminalVisible={nativeTerminalVisible}
         />
         <Separator />
         <SessionHistory
@@ -675,6 +710,32 @@ function DraftEditor({
         showTrigger={false}
         emitIntent={emitIntent}
       />
+      <AlertDialog
+        open={dialog === "discard"}
+        onOpenChange={(open) => setDialog(open ? "discard" : undefined)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Discard this Draft?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Agent Factory will remove the managed worktree only when Git
+              confirms that no authored changes would be lost.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={() => void emitIntent({
+                type: "agentDraft.discard",
+                agentDraftId: draft.id,
+              })}
+            >
+              Discard Draft
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }
@@ -855,7 +916,6 @@ function RunWorkspace({
   dirty,
   emitIntent,
   startDraftRun,
-  nativeTerminalVisible,
 }: {
   draft: AgentDraftProjection
   project?: ProjectProjection
@@ -872,8 +932,8 @@ function RunWorkspace({
     runId: string,
     draftId: string,
     environmentId: string,
+    objective: string,
   ) => Promise<void>
-  nativeTerminalVisible: boolean
 }) {
   const managedRunGroups = runs
     .map((candidate) => ({
@@ -898,6 +958,20 @@ function RunWorkspace({
     agent.workspaceBindingId === draft.workspaceBindingId &&
     !agent.managedSessionId)
 
+  if (!run) {
+    return (
+      <NewRunComposer
+        draft={draft}
+        project={project}
+        selectedEnvironment={selectedEnvironment}
+        readyEnvironments={readyEnvironments}
+        dirty={dirty}
+        emitIntent={emitIntent}
+        startDraftRun={startDraftRun}
+      />
+    )
+  }
+
   return (
     <section aria-labelledby="herdr-agents-title" className="flex flex-col gap-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -919,18 +993,11 @@ function RunWorkspace({
           </p>
         </div>
         <RunLifecycleActions
-          draft={draft}
-          project={project}
           run={run}
-          herdr={herdr}
-          selectedEnvironment={selectedEnvironment}
-          readyEnvironments={readyEnvironments}
-          dirty={dirty}
           emitIntent={emitIntent}
-          startDraftRun={startDraftRun}
-          nativeTerminalVisible={nativeTerminalVisible}
         />
       </div>
+      <RunConversation run={run} sessions={sessions} />
       {run?.escalation ? (
         <div
           role="status"
@@ -1039,10 +1106,9 @@ function ManagedRunGroup({
   )
 }
 
-function RunLifecycleActions({
+function NewRunComposer({
   draft,
   project,
-  run,
   selectedEnvironment,
   readyEnvironments,
   dirty,
@@ -1051,8 +1117,6 @@ function RunLifecycleActions({
 }: {
   draft: AgentDraftProjection
   project?: ProjectProjection
-  run?: FactoryRunProjection
-  herdr?: HerdrStatusDto
   selectedEnvironment?: string
   readyEnvironments: readonly EnvironmentDto[]
   dirty: boolean
@@ -1061,87 +1125,193 @@ function RunLifecycleActions({
     runId: string,
     draftId: string,
     environmentId: string,
+    objective: string,
   ) => Promise<void>
-  nativeTerminalVisible?: boolean
 }) {
+  const [objective, setObjective] = React.useState("")
   const [startingRunId, setStartingRunId] = React.useState<string>()
   const starting = Boolean(startingRunId)
+  const canStart = Boolean(
+    objective.trim() &&
+    selectedEnvironment &&
+    project?.trusted &&
+    !dirty &&
+    !starting,
+  )
 
-  if (!run) {
-    return (
-      <div className="flex items-center gap-2">
-        {readyEnvironments.length > 1 ? (
-          <Select
-            value={selectedEnvironment ?? ""}
-            onValueChange={(environmentId) => {
-              // The picker offers no empty entry, so a cleared value is the
-              // primitive's own state, not a choice worth recording.
-              if (!environmentId) return
-              void emitIntent({
-                type: "agentDraft.environment.set",
-                agentDraftId: draft.id,
-                environmentId,
-              })
-            }}
-          >
-            <SelectTrigger size="sm" aria-label="Environment for this Draft">
-              {/* The trigger shows the value, which is an id; a person picked
-                  it by name, so show the name back to them. */}
-              <SelectValue>
-                {(value: string | null) =>
-                  readyEnvironments.find((environment) => environment.id === value)
-                    ?.name ?? value}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {readyEnvironments.map((environment) => (
-                  <SelectItem key={environment.id} value={environment.id}>
-                    {environment.name}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        ) : null}
-        <Button
-          size="sm"
-          disabled={starting || !selectedEnvironment || !project?.trusted || dirty}
-          onClick={() => {
-            if (!selectedEnvironment) return
-            const runId = crypto.randomUUID()
-            setStartingRunId(runId)
-            void startDraftRun(runId, draft.id, selectedEnvironment)
-              .finally(() => setStartingRunId((current) =>
-                current === runId ? undefined : current))
-          }}
-        >
-          {starting ? (
-            <LoaderCircleIcon className="animate-spin" data-icon="inline-start" />
-          ) : (
-            <PlayIcon data-icon="inline-start" />
-          )}
-          {starting ? "Starting Run…" : "Start Run"}
-        </Button>
-        {startingRunId ? (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => void emitIntent({
-              type: "run.cancel",
-              runId: startingRunId,
-            })}
-          >
-            Cancel Run
-          </Button>
-        ) : null}
+  const startRun = ({ text }: PromptInputMessage) => {
+    const nextObjective = text.trim()
+    if (!canStart || !selectedEnvironment || !nextObjective) return
+    const runId = crypto.randomUUID()
+    setStartingRunId(runId)
+    void startDraftRun(
+      runId,
+      draft.id,
+      selectedEnvironment,
+      nextObjective,
+    ).finally(() => setStartingRunId((current) =>
+      current === runId ? undefined : current))
+  }
+
+  return (
+    <section
+      aria-labelledby="new-run-title"
+      className="mx-auto flex w-full max-w-3xl flex-col gap-6 py-8"
+    >
+      <div className="flex flex-col gap-2 text-center">
+        <h2 id="new-run-title" className="text-xl font-semibold tracking-tight">
+          What would you like to accomplish?
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Describe the outcome. The Orchestrator will coordinate the work.
+        </p>
       </div>
-    )
-  }
+      <PromptInput onSubmit={startRun}>
+        <PromptInputBody className="h-auto">
+          <PromptInputTextarea
+            value={objective}
+            autoFocus
+            placeholder="Fix the flaky authentication tests and verify token refresh."
+            aria-label="Run objective"
+            onChange={(event) => setObjective(event.currentTarget.value)}
+            onKeyDown={(event) => {
+              if (event.key !== "Enter" || event.shiftKey) return
+              event.preventDefault()
+              event.currentTarget.form?.requestSubmit()
+            }}
+          />
+          <PromptInputFooter>
+            <PromptInputTools>
+              <Badge variant="outline">{project?.name ?? "No project"}</Badge>
+              {readyEnvironments.length > 1 ? (
+                <Select
+                  value={selectedEnvironment ?? ""}
+                  onValueChange={(environmentId) => {
+                    if (!environmentId) return
+                    void emitIntent({
+                      type: "agentDraft.environment.set",
+                      agentDraftId: draft.id,
+                      environmentId,
+                    })
+                  }}
+                >
+                  <SelectTrigger
+                    size="sm"
+                    aria-label="Environment for this Run"
+                  >
+                    <SelectValue>
+                      {(value: string | null) =>
+                        readyEnvironments.find(
+                          (environment) => environment.id === value,
+                        )?.name ?? value}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {readyEnvironments.map((environment) => (
+                        <SelectItem key={environment.id} value={environment.id}>
+                          {environment.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Badge variant="outline">
+                  {readyEnvironments[0]?.name ?? "No ready Environment"}
+                </Badge>
+              )}
+            </PromptInputTools>
+            <div className="flex items-center gap-2">
+              {startingRunId ? (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => void emitIntent({
+                    type: "run.cancel",
+                    runId: startingRunId,
+                  })}
+                >
+                  Cancel Run
+                </Button>
+              ) : null}
+              <PromptInputSubmit pending={starting} disabled={!canStart} />
+            </div>
+          </PromptInputFooter>
+        </PromptInputBody>
+      </PromptInput>
+      {!project?.trusted ? (
+        <p className="text-center text-xs text-muted-foreground">
+          Trust this Project before starting a Run.
+        </p>
+      ) : null}
+    </section>
+  )
+}
 
-  if (runIsTerminal(run)) {
-    return null
-  }
+function RunConversation({
+  run,
+  sessions,
+}: {
+  run: FactoryRunProjection
+  sessions: readonly SessionProjection[]
+}) {
+  const runSessions = sessions.filter((session) =>
+    session.factoryRunId === run.id)
+  const codingCount = runSessions.filter((session) =>
+    session.purpose === "coding").length
+  const evaluationCount = runSessions.filter((session) =>
+    session.purpose === "evaluation").length
+  const activity = [
+    "Worktree prepared",
+    runSessions.some((session) => session.purpose === "orchestration")
+      ? "Orchestrator started"
+      : "Starting Orchestrator",
+    codingCount > 0
+      ? `${codingCount} Coding ${codingCount === 1 ? "agent" : "agents"} started`
+      : undefined,
+    evaluationCount > 0
+      ? "Evaluation started"
+      : undefined,
+  ].filter((item): item is string => Boolean(item))
+
+  return (
+    <div className="flex min-h-64 flex-col rounded-lg border bg-card">
+      <Conversation>
+        <ConversationContent className="mx-auto w-full max-w-3xl">
+          <Message from="user">
+            <MessageLabel>You</MessageLabel>
+            <MessageContent>{run.objective}</MessageContent>
+          </Message>
+          <Message from="system">
+            <MessageLabel>Agent Factory</MessageLabel>
+            <MessageContent>
+              {activity.map((item) => `✓ ${item}`).join("\n")}
+            </MessageContent>
+          </Message>
+          {run.escalation ? (
+            <Message from="assistant">
+              <MessageLabel>Orchestrator</MessageLabel>
+              <MessageContent>{run.escalation}</MessageContent>
+            </Message>
+          ) : null}
+        </ConversationContent>
+        <ConversationScrollButton />
+      </Conversation>
+    </div>
+  )
+}
+
+function RunLifecycleActions({
+  run,
+  emitIntent,
+}: {
+  run: FactoryRunProjection
+  emitIntent: EmitIntent
+}) {
+  if (runIsTerminal(run)) return null
+
   return (
     <div className="flex items-center gap-2">
       <RunIntentButton label="Cancel Run" run={run} emitIntent={emitIntent} />
@@ -1675,10 +1845,14 @@ function SessionHistory({
 }) {
   const groups = draftSessionHistory(draft, runs, sessions)
   return (
-    <section aria-labelledby="session-history-title" className="flex flex-col gap-4">
+    <section
+      id={`run-history-${draft.id}`}
+      aria-labelledby="run-history-title"
+      className="flex scroll-mt-4 flex-col gap-4"
+    >
       <div className="space-y-1">
-        <h2 id="session-history-title" className="text-sm font-semibold tracking-tight">
-          Session History
+        <h2 id="run-history-title" className="text-sm font-semibold tracking-tight">
+          Run History
         </h2>
         <p className="text-xs text-muted-foreground">
           Orchestrator, Coding, and Evaluation sessions for this Draft.

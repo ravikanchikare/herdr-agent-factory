@@ -930,13 +930,18 @@ impl FactoryHarness {
                 json!({
                     "runId": requested_run_id,
                     "agentDraftId": draft_id,
-                    "environmentId": environment_id
+                    "environmentId": environment_id,
+                    "objective": "Ship the requested Factory improvement"
                 }),
             )),
             "factoryRun.create",
         );
         let run_id = created["run"]["id"].as_str().unwrap().to_owned();
         assert_eq!(run_id, requested_run_id.to_string());
+        assert_eq!(
+            created["run"]["objective"],
+            "Ship the requested Factory improvement"
+        );
         let orchestrator_pane = created["session"]["placement"]["paneId"]
             .as_str()
             .unwrap()
@@ -1251,7 +1256,8 @@ fn start_run_resumes_an_existing_live_orchestrator() {
             json!({
                 "runId": uuid::Uuid::new_v4(),
                 "agentDraftId": draft_id,
-                "environmentId": environment_id
+                "environmentId": environment_id,
+                "objective": "Resume the existing objective"
             }),
         )),
         "factoryRun.create again",
@@ -1536,7 +1542,8 @@ mod agent_control_tests {
                     json!({
                         "runId": uuid::Uuid::new_v4(),
                         "agentDraftId": draft_id,
-                        "environmentId": "loop-environment"
+                        "environmentId": "loop-environment",
+                        "objective": "Continue after reconnecting control"
                     }),
                 )),
                 "factoryRun.create",
@@ -1870,7 +1877,8 @@ mod agent_control_tests {
                 json!({
                     "runId": uuid::Uuid::new_v4(),
                     "agentDraftId": draft_id,
-                    "environmentId": "loop-environment"
+                    "environmentId": "loop-environment",
+                    "objective": "Start a follow-up Run"
                 }),
             )),
             "factoryRun.create after cancellation",

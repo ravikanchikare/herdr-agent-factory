@@ -167,6 +167,7 @@ export type CreateEnvironmentParams = {
 export type CreateFactoryRunParams = {
   agentDraftId: string
   environmentId: string
+  objective: string
   runId: string
 }
 

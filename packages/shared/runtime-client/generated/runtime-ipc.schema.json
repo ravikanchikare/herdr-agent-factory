@@ -732,6 +732,9 @@
         "environmentId": {
           "type": "string"
         },
+        "objective": {
+          "type": "string"
+        },
         "runId": {
           "format": "uuid",
           "type": "string"
@@ -740,7 +743,8 @@
       "required": [
         "runId",
         "agentDraftId",
-        "environmentId"
+        "environmentId",
+        "objective"
       ],
       "type": "object"
     },

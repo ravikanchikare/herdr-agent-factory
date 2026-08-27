@@ -25,8 +25,9 @@ inventing product.
 5. A Factory Run records one Orchestrator session and the Coding or
    Evaluation sessions that Orchestrator explicitly requests. It does
    not claim every agent in the Workspace.
-6. Starting a Run resolves one selected Environment, then asks Herdr
-   to create a fresh Orchestrator in the binding's Workspace.
+6. Starting a Run accepts the user's conversational objective, resolves
+   one selected Environment, then asks Herdr to create a fresh Orchestrator
+   in the binding's Workspace.
 7. Only the Orchestrator holds `AGENT_FACTORY_CONTROL_TOKEN`. Its
    verbs are `status`, `start coding`, `start evaluation`, `escalate`,
    and `finish` (`pass` | `needs-review`).
@@ -116,9 +117,9 @@ Single static page (`apps/web-ui/app/page.tsx`) rendering
 - Sidebar: Target Agents as disclosure folders; Draft rows by binding
   name; Create Agent; Settings. Versions are not sidebar identities.
 - Work creation: Target Agent, project root, Environment, objective.
-- Draft workspace: definition, Environment picker, Start/Cancel Run,
-  live Herdr agent tree, session history, code-changes inspector,
-  Open/Close Herdr terminal in the title bar.
+- Draft workspace: conversational Run composer, visible Project and
+  Environment context, Cancel Run, live Herdr agent tree, Run history,
+  code-changes inspector, Open/Close Herdr terminal in the title bar.
 - Draft Overview: width-driven inline column or popover.
 - Versions: tab surface and read-only Git file inspector.
 - Session panes: coding/evaluation transcript and agent-native input.

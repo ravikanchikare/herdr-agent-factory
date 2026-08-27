@@ -334,6 +334,7 @@ pub struct CreateFactoryRunParams {
     pub run_id: Uuid,
     pub agent_draft_id: Uuid,
     pub environment_id: String,
+    pub objective: String,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

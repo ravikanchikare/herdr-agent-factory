@@ -503,7 +503,7 @@ async function installRuntime(page: Page, mode: WorkspaceMode) {
               workspaceBindingId: binding.id,
               projectId: project.id,
               environmentId: request.params.environmentId,
-              objective: drafts[0]?.objective,
+              objective: request.params.objective,
               acceptanceCriteria: drafts[0]?.acceptanceCriteria,
               startingGitHead: drafts[0]?.gitHead,
               finalGitHead: null,
@@ -790,11 +790,18 @@ test("Start opens the terminal and Cancel resets the Draft immediately", async (
   await installRuntime(page, "ready")
   await page.goto("/")
   const draft = page.getByRole("region", { name: "Commerce Copilot Draft" })
+  const pane = page.getByRole("region", { name: "Commerce Copilot pane" })
 
+  await expect(pane.locator("header").first().getByRole("button", {
+    name: "Run History",
+  })).toBeVisible()
+  await draft.getByRole("textbox", { name: "Run objective" })
+    .fill("Fix flaky authentication tests")
   await draft.getByRole("button", { name: "Start Run" }).click()
   await expect.poll(() => requestFor(page, "factoryRun.create")).toMatchObject({
     agentDraftId: "22222222-2222-4222-8222-222222222222",
     environmentId: "smoke-environment",
+    objective: "Fix flaky authentication tests",
   })
   await expect.poll(() => requestFor(page, "agentDraft.openWorkspace"))
     .toEqual({ agentDraftId: "22222222-2222-4222-8222-222222222222" })
@@ -855,10 +862,13 @@ test("edits the Draft and starts a Run isolated to its Draft ID", async ({ page 
     agentDraftId: "22222222-2222-4222-8222-222222222222",
     objective: "Resolve every commerce question",
   })
+  await draft.getByRole("textbox", { name: "Run objective" })
+    .fill("Verify every commerce answer")
   await draft.getByRole("button", { name: "Start Run" }).click()
   await expect.poll(() => requestFor(page, "factoryRun.create")).toMatchObject({
     agentDraftId: "22222222-2222-4222-8222-222222222222",
     environmentId: "smoke-environment",
+    objective: "Verify every commerce answer",
   })
   await expect.poll(() => requestMethods(page)).not.toContain("run.startCoding")
 })
@@ -889,12 +899,12 @@ test("Draft Overview switches between inline and popover modes", async ({ page }
   await expect(page.getByRole("complementary", { name: "Draft Overview" }))
     .toHaveCount(0)
   await expect(draft.getByRole("heading", { name: "Herdr agents" })).toBeVisible()
-  await expect(draft.getByRole("heading", { name: "Session History" }))
+  await expect(draft.getByRole("heading", { name: "Run History" }))
     .toBeVisible()
   await expect(draft.getByText("No session history yet")).toBeVisible()
   await expect(draft.getByRole("heading", { name: "Version history" }))
     .toHaveCount(0)
-  const runHistory = draft.getByRole("heading", { name: "Session History" })
+  const runHistory = draft.getByRole("heading", { name: "Run History" })
     .locator("xpath=ancestor::section[1]")
   const [closedDraftBox, closedRunHistoryBox] = await Promise.all([
     draft.boundingBox(),

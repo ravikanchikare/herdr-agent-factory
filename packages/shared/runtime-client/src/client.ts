@@ -551,6 +551,7 @@ export class BrowserRuntimeClient implements RuntimeClient {
           runId: intent.runId,
           agentDraftId: intent.agentDraftId,
           environmentId: intent.environmentId,
+          objective: intent.objective,
         })
         try {
           if (

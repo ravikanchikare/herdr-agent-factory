@@ -2171,6 +2171,7 @@ describe("BrowserRuntimeClient", () => {
       runId: "run-1",
       agentDraftId: "draft-1",
       environmentId: "default",
+      objective: "Improve the agent",
     })
 
     expect(invoke.mock.calls.map(([, request]) => request)
@@ -2216,6 +2217,7 @@ describe("BrowserRuntimeClient", () => {
             runId: "run-1",
             agentDraftId: "draft-1",
             environmentId: "default",
+            objective: "Improve the agent",
           },
         },
         {
@@ -2336,6 +2338,7 @@ describe("BrowserRuntimeClient", () => {
       runId: "11111111-1111-4111-8111-111111111111",
       agentDraftId: "22222222-2222-4222-8222-222222222222",
       environmentId: "default",
+      objective: "Improve the weather reporter",
     })
 
     expect(invoke).toHaveBeenCalledWith("desktop.terminal.show.v1", {

@@ -6,6 +6,7 @@ import {
   Globe2Icon,
   GitBranchIcon,
   GripVerticalIcon,
+  HistoryIcon,
   MoreHorizontalIcon,
   PanelLeftIcon,
   PencilIcon,
@@ -13,6 +14,7 @@ import {
   SearchIcon,
   TagIcon,
   TerminalIcon,
+  Trash2Icon,
   XIcon,
 } from "lucide-react"
 
@@ -153,6 +155,7 @@ type StartDraftRun = (
   runId: string,
   agentDraftId: string,
   environmentId: string,
+  objective: string,
 ) => Promise<void>
 type ListVersionFiles = (versionId: string) => Promise<VersionFilesListDto>
 type ReadVersionFile = (
@@ -722,7 +725,6 @@ function WorkspacePaneSession({ pane, position, paneCount, projection, emitInten
             onEditStateChange={setIsEditing}
             versionSurface={versionSurface}
             readAgentTranscript={readAgentTranscript}
-            nativeTerminalVisible={nativeTerminalVisible}
           />
         </div>
         {isEditing ? null : draftOverviewContent ? (
@@ -835,12 +837,33 @@ function PaneHeader({ pane, data, emitIntent, position, paneCount, sidebarOpen, 
                     Create Version
                   </DropdownMenuItem>
                 )}
+                {draftWorkflow.onDiscardDraft ? (
+                  <DropdownMenuItem
+                    variant="destructive"
+                    disabled={draftWorkflow.discardDisabled}
+                    onClick={draftWorkflow.onDiscardDraft}
+                  >
+                    <Trash2Icon />
+                    Discard Draft
+                  </DropdownMenuItem>
+                ) : null}
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       ) : null}
       <div data-native-no-drag className="ml-auto flex shrink-0 items-center gap-1">
+        {draftWorkflow?.onOpenRunHistory ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={draftWorkflow.onOpenRunHistory}
+          >
+            <HistoryIcon data-icon="inline-start" />
+            Run History
+          </Button>
+        ) : null}
         {draftOverview}
         <Tooltip>
           <TooltipTrigger render={
@@ -885,7 +908,7 @@ function PaneHeader({ pane, data, emitIntent, position, paneCount, sidebarOpen, 
   )
 }
 
-function PaneBody({ data, projection, emitIntent, startDraftRun, sidebarOpen, onDraftWorkflowChange, onEditStateChange, versionSurface, readAgentTranscript, nativeTerminalVisible }: { data: PaneData; projection: WorkspaceProjection; emitIntent: EmitIntent; startDraftRun: StartDraftRun; sidebarOpen: boolean; onDraftWorkflowChange: (chrome: DraftWorkflowChrome | null) => void; onEditStateChange?: (editing: boolean) => void; versionSurface?: React.ReactNode; readAgentTranscript?: ReadAgentTranscript; nativeTerminalVisible: boolean }) {
+function PaneBody({ data, projection, emitIntent, startDraftRun, sidebarOpen, onDraftWorkflowChange, onEditStateChange, versionSurface, readAgentTranscript }: { data: PaneData; projection: WorkspaceProjection; emitIntent: EmitIntent; startDraftRun: StartDraftRun; sidebarOpen: boolean; onDraftWorkflowChange: (chrome: DraftWorkflowChrome | null) => void; onEditStateChange?: (editing: boolean) => void; versionSurface?: React.ReactNode; readAgentTranscript?: ReadAgentTranscript }) {
 
   if (data.item?.kind === "coding_thread" || data.item?.kind === "evaluation_thread") {
     const session = projection.sessions.find((candidate) => candidate.id === data.item?.id)
@@ -934,7 +957,6 @@ function PaneBody({ data, projection, emitIntent, startDraftRun, sidebarOpen, on
         onDraftWorkflowChange={onDraftWorkflowChange}
         onEditStateChange={onEditStateChange}
         versionSurface={versionSurface}
-        nativeTerminalVisible={nativeTerminalVisible}
         versions={data.group.versions}
         readAgentTranscript={readAgentTranscript}
       />
@@ -1100,6 +1122,16 @@ function DedicatedDraftWindow({
                       Create Version
                     </DropdownMenuItem>
                   )}
+                  {draftWorkflow.onDiscardDraft ? (
+                    <DropdownMenuItem
+                      variant="destructive"
+                      disabled={draftWorkflow.discardDisabled}
+                      onClick={draftWorkflow.onDiscardDraft}
+                    >
+                      <Trash2Icon />
+                      Discard Draft
+                    </DropdownMenuItem>
+                  ) : null}
                 </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -1170,7 +1202,6 @@ function DedicatedDraftWindow({
                 sidebarOpen={false}
                 onDraftWorkflowChange={setDraftWorkflow}
                 versionSurface={versionSurface}
-                nativeTerminalVisible={nativeTerminalVisible}
                 versions={versions}
               />
             ) : (

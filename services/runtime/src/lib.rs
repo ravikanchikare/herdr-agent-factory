@@ -359,6 +359,7 @@ impl Runtime {
 
     pub fn handle_request(&mut self, request: Request) -> Vec<Frame> {
         let request_id = request.id;
+        let request_method = request.method.clone();
         let result = match request.method.as_str() {
             "runtime.hello" => self.runtime_hello(),
             "snapshot.get" => self.snapshot(),
@@ -455,11 +456,20 @@ impl Runtime {
                 }
                 frames
             }
-            Err(error) => vec![Frame::Response(Response::error(
-                request_id,
-                error.code(),
-                error.to_string(),
-            ))],
+            Err(error) => {
+                // Runtime stdout is reserved for framed IPC. Log only the
+                // method and error class on stderr so diagnostics cannot copy
+                // request payloads, credentials, or credential-bearing URLs.
+                eprintln!(
+                    "runtime request failed: method={request_method} code={:?}",
+                    error.code()
+                );
+                vec![Frame::Response(Response::error(
+                    request_id,
+                    error.code(),
+                    error.to_string(),
+                ))]
+            }
         }
     }
 
@@ -794,7 +804,7 @@ impl Runtime {
                     "environmentId is required when starting the first Run".into(),
                 )
             })?;
-            self.create_run(Uuid::new_v4(), draft.id, environment_id)?;
+            self.create_run(Uuid::new_v4(), draft.id, environment_id, &draft.objective)?;
         }
         let revision = self.store.snapshot()?.revision;
         Ok(DispatchResult {
@@ -1230,14 +1240,17 @@ impl Runtime {
         draft: &AgentDraftProjection,
         discard: bool,
     ) -> Result<(), DispatchError> {
+        // A deleted checkout is already clean from the perspective of Draft
+        // cleanup. Keep discard available so the durable record can be
+        // reconciled instead of trapping the user on a broken Draft.
+        if !draft.worktree_path.exists() {
+            return Ok(());
+        }
         if discard {
             self.git.prepare_draft_discard(&draft.worktree_path)?;
         } else {
             self.git
                 .prepare_clean_worktree_removal(&draft.worktree_path)?;
-        }
-        if !draft.worktree_path.exists() {
-            return Ok(());
         }
         if !self.herdr.is_connected() {
             return Err(DispatchError::InvalidParams(format!(
@@ -1919,7 +1932,12 @@ impl Runtime {
 
     fn factory_run_create(&mut self, params: Value) -> Result<DispatchResult, DispatchError> {
         let params: CreateFactoryRunParams = decode_params(params)?;
-        self.create_run(params.run_id, params.agent_draft_id, &params.environment_id)
+        self.create_run(
+            params.run_id,
+            params.agent_draft_id,
+            &params.environment_id,
+            &params.objective,
+        )
     }
 
     fn create_run(
@@ -1927,6 +1945,7 @@ impl Runtime {
         run_id: Uuid,
         agent_draft_id: Uuid,
         environment_id: &str,
+        objective: &str,
     ) -> Result<DispatchResult, DispatchError> {
         let draft = self.store.agent_draft(agent_draft_id)?;
         if draft.lifecycle != AgentDraftLifecycle::Active {
@@ -1934,19 +1953,21 @@ impl Runtime {
                 "only an active Draft can start a Run".into(),
             ));
         }
+        Self::require_existing_draft_checkout(&draft)?;
         if let Some(existing) = self.live_run_for_draft(draft.id)? {
             return self.resume_or_attach_orchestrator(existing);
         }
         let binding = self.store.workspace_binding(draft.workspace_binding_id)?;
         self.require_trusted_project(binding.project_id)?;
         self.require_ready_environment(environment_id)?;
+        let objective = normalize_required("Run objective", objective, MAX_FACTORY_PROMPT_BYTES)?;
         let mut run = FactoryRun::new(FactoryRunInput {
             target_agent_id: draft.target_agent_id,
             agent_draft_id: draft.id,
             workspace_binding_id: binding.id,
             project_id: binding.project_id,
             environment_id: environment_id.into(),
-            objective: draft.objective,
+            objective,
             acceptance_criteria: draft.acceptance_criteria,
             starting_git_head: self.git.head(&draft.worktree_path)?,
         })?;
@@ -1977,6 +1998,7 @@ impl Runtime {
                 "only an active Draft can open its Herdr workspace".into(),
             ));
         }
+        Self::require_existing_draft_checkout(&draft)?;
         if !self.herdr.is_connected() {
             return Err(DispatchError::Herdr(self.herdr.status().issues.join("; ")));
         }
@@ -2011,6 +2033,16 @@ impl Runtime {
                 revision,
             },
         )?))
+    }
+
+    fn require_existing_draft_checkout(draft: &AgentDraftProjection) -> Result<(), DispatchError> {
+        if draft.worktree_path.is_dir() {
+            return Ok(());
+        }
+        Err(DispatchError::InvalidParams(format!(
+            "The Draft checkout no longer exists at `{}`. Discard this Draft and create a new one from an existing repository.",
+            draft.worktree_path.display(),
+        )))
     }
 
     fn workspace_pane_open(
@@ -6321,6 +6353,58 @@ mod tests {
         ));
         let _ = response_result(&discarded);
         assert!(!worktree_path.exists());
+    }
+
+    #[test]
+    fn a_missing_draft_checkout_is_actionable_and_can_be_discarded() {
+        let (_container, root) = test_repository();
+        let mut runtime = runtime_with_herdr();
+        let created = runtime.handle_request(Request::new(
+            "targetAgent.create",
+            json!({
+                "name": "Missing Checkout Agent",
+                "objective": "Recover from a deleted checkout",
+                "acceptanceCriteria": ["The stale Draft can be discarded"],
+                "repositoryRoot": root,
+                "draftName": "main",
+                "trusted": true,
+            }),
+        ));
+        let draft_id = response_result(&created)["draft"]["id"]
+            .as_str()
+            .unwrap()
+            .to_owned();
+        let draft_uuid = Uuid::parse_str(&draft_id).unwrap();
+        let worktree_path = PathBuf::from(
+            response_result(&created)["draft"]["worktreePath"]
+                .as_str()
+                .unwrap(),
+        );
+        fs::remove_dir_all(&worktree_path).unwrap();
+
+        let rejected = runtime.handle_request(Request::new(
+            "agentDraft.openWorkspace",
+            json!({"agentDraftId": draft_id}),
+        ));
+        assert!(matches!(
+            &rejected[0],
+            Frame::Response(Response {
+                outcome: ResponseOutcome::Error { error },
+                ..
+            }) if error.code == ErrorCode::InvalidParams
+                && error.message.contains("Draft checkout no longer exists")
+                && error.message.contains("Discard this Draft")
+        ));
+
+        let discarded = runtime.handle_request(Request::new(
+            "agentDraft.discard",
+            json!({"agentDraftId": draft_id}),
+        ));
+        let _ = response_result(&discarded);
+        assert_eq!(
+            runtime.store.agent_draft(draft_uuid).unwrap().lifecycle,
+            AgentDraftLifecycle::Archived
+        );
     }
 
     #[test]

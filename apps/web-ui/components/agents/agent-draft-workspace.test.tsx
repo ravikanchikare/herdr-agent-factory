@@ -133,7 +133,6 @@ function renderWorkspace({
   onOpenCodeChanges = vi.fn(),
   showOverview = true,
   versionSurface,
-  nativeTerminalVisible = false,
 }: {
   runs?: readonly FactoryRunProjection[]
   sessions?: readonly SessionProjection[]
@@ -147,11 +146,11 @@ function renderWorkspace({
     runId: string,
     draftId: string,
     environmentId: string,
+    objective: string,
   ) => Promise<void>
   onOpenCodeChanges?: (run: FactoryRunProjection) => void
   showOverview?: boolean
   versionSurface?: ReactNode
-  nativeTerminalVisible?: boolean
 } = {}) {
   const onDraftWorkflowChange = vi.fn()
   const activeRunId = selectedRunId ??
@@ -182,7 +181,6 @@ function renderWorkspace({
         startDraftRun={startDraftRun}
         onDraftWorkflowChange={onDraftWorkflowChange}
         versionSurface={versionSurface}
-        nativeTerminalVisible={nativeTerminalVisible}
       />
       {showOverview ? (
         <aside aria-label="Draft Overview">
@@ -229,6 +227,15 @@ async function openEditForm(
   })
 }
 
+function enterRunObjective(
+  objective = "Fix flaky authentication tests and verify token refresh.",
+) {
+  fireEvent.change(screen.getByRole("textbox", { name: "Run objective" }), {
+    target: { value: objective },
+  })
+  return objective
+}
+
 describe("AgentDraftWorkspace", () => {
   it("shows a simplified floating overview without Draft badge or trust", () => {
     renderWorkspace()
@@ -241,12 +248,12 @@ describe("AgentDraftWorkspace", () => {
     expect(screen.queryByText(draft.objective, { exact: true })).toBeNull()
     expect(screen.getByRole("button", { name: "Success criteria" })).toBeVisible()
     expect(screen.queryByText("1 criterion")).toBeNull()
-    expect(screen.getByText("Environment A")).toBeVisible()
+    expect(screen.getAllByText("Environment A")).toHaveLength(2)
     expect(screen.getByText("Code changes")).toBeVisible()
     expect(screen.getByText("0 files")).toBeVisible()
     expect(screen.getByText("../ipl-ipl-expert-main-22222222")).toBeVisible()
     expect(screen.queryByText("Trust workspace")).toBeNull()
-    expect(screen.getByRole("heading", { name: "Session History" }))
+    expect(screen.getByRole("heading", { name: "Run History" }))
       .toBeVisible()
     expect(screen.getByText("No session history yet")).toBeVisible()
     expect(screen.getByText(
@@ -327,7 +334,7 @@ describe("AgentDraftWorkspace", () => {
 
     expect(screen.queryByRole("complementary", { name: "Draft Overview" }))
       .toBeNull()
-    expect(screen.getByRole("heading", { name: "Session History" }))
+    expect(screen.getByRole("heading", { name: "Run History" }))
       .toBeVisible()
   })
 
@@ -409,12 +416,14 @@ describe("AgentDraftWorkspace", () => {
 
   it("starts a new Run with the selected ready Environment", () => {
     const { startDraftRun } = renderWorkspace()
+    const objective = enterRunObjective()
 
     fireEvent.click(screen.getByRole("button", { name: "Start Run" }))
     expect(startDraftRun).toHaveBeenCalledWith(
       expect.any(String),
       draft.id,
       environment.id,
+      objective,
     )
   })
 
@@ -433,11 +442,13 @@ describe("AgentDraftWorkspace", () => {
       runId: string,
       draftId: string,
       environmentId: string,
+      objective: string,
     ) => Promise<void>>(() => new Promise<void>((resolve) => {
       finishStart = resolve
     }))
     const emitIntent = vi.fn(async () => undefined)
     renderWorkspace({ startDraftRun, emitIntent })
+    enterRunObjective()
 
     fireEvent.click(screen.getByRole("button", { name: "Start Run" }))
     expect(screen.getByRole("button", { name: "Starting Run…" }))
@@ -462,19 +473,6 @@ describe("AgentDraftWorkspace", () => {
 
     expect(screen.queryByRole("button", { name: "Open Terminal" })).toBeNull()
     expect(screen.getByRole("button", { name: "Cancel Run" })).toBeVisible()
-  })
-
-  it("does not show a Close Terminal action when the terminal is already visible", () => {
-    const run = makeRun("orchestrating")
-    renderWorkspace({
-      runs: [run],
-      selectedRunId: run.id,
-      herdr: { connected: true, freshness: "live", issues: [] },
-      nativeTerminalVisible: true,
-    })
-
-    expect(screen.queryByRole("button", { name: "Close Terminal" })).toBeNull()
-    expect(screen.queryByRole("button", { name: "Open Terminal" })).toBeNull()
   })
 
   it("exposes relative worktree display with full path on copy", async () => {
@@ -520,6 +518,7 @@ describe("AgentDraftWorkspace", () => {
       environments: [environment, environmentB],
       activeDraft: { ...draft, environmentId: environmentB.id },
     })
+    const objective = enterRunObjective()
 
     fireEvent.click(screen.getByRole("button", { name: "Start Run" }))
 
@@ -527,6 +526,7 @@ describe("AgentDraftWorkspace", () => {
       expect.any(String),
       draft.id,
       environmentB.id,
+      objective,
     )
   })
 
@@ -537,6 +537,7 @@ describe("AgentDraftWorkspace", () => {
       environments: [environment],
       activeDraft: { ...draft, environmentId: "environment-deleted" },
     })
+    const objective = enterRunObjective()
 
     fireEvent.click(screen.getByRole("button", { name: "Start Run" }))
 
@@ -544,6 +545,7 @@ describe("AgentDraftWorkspace", () => {
       expect.any(String),
       draft.id,
       environment.id,
+      objective,
     )
   })
 
@@ -554,7 +556,7 @@ describe("AgentDraftWorkspace", () => {
     })
 
     const picker = screen.getByRole("combobox", {
-      name: "Environment for this Draft",
+      name: "Environment for this Run",
     })
     // A person picks by name, so the trigger shows the name rather than the id
     // the value carries.
@@ -580,7 +582,7 @@ describe("AgentDraftWorkspace", () => {
     renderWorkspace({ environments: [environment] })
 
     expect(
-      screen.queryByRole("combobox", { name: "Environment for this Draft" }),
+      screen.queryByRole("combobox", { name: "Environment for this Run" }),
     ).toBeNull()
   })
 
@@ -810,7 +812,28 @@ describe("AgentDraftWorkspace", () => {
     })
   })
 
-  it("lists Orchestrator, Coding, and Evaluation sessions in Session History", () => {
+  it("confirms Draft discard through registered workflow chrome", async () => {
+    const emitIntent = vi.fn(async () => undefined)
+    const { onDraftWorkflowChange } = renderWorkspace({ emitIntent })
+
+    await waitFor(() => {
+      expect(latestWorkflow(onDraftWorkflowChange)?.onDiscardDraft).toBeTruthy()
+    })
+    latestWorkflow(onDraftWorkflowChange)?.onDiscardDraft?.()
+    const dialog = await screen.findByRole("alertdialog", {
+      name: "Discard this Draft?",
+    })
+    fireEvent.click(within(dialog).getByRole("button", {
+      name: "Discard Draft",
+    }))
+
+    expect(emitIntent).toHaveBeenCalledWith({
+      type: "agentDraft.discard",
+      agentDraftId: draft.id,
+    })
+  })
+
+  it("lists Orchestrator, Coding, and Evaluation sessions in Run History", () => {
     const coding = makeSession("coding", {
       lifecycle: undefined,
       availability: "historical",
@@ -837,7 +860,7 @@ describe("AgentDraftWorkspace", () => {
       selectedRunId: run.id,
     })
 
-    expect(screen.getByRole("heading", { name: "Session History" }))
+    expect(screen.getByRole("heading", { name: "Run History" }))
       .toBeVisible()
     expect(screen.getAllByText("Orchestrator").length).toBeGreaterThan(0)
     expect(screen.getAllByText("Coding").length).toBeGreaterThan(0)
